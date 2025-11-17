@@ -14,7 +14,166 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      product_images: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          is_primary: boolean
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          is_primary?: boolean
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_primary?: boolean
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_images_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          brand: string | null
+          category: Database["public"]["Enums"]["product_category"]
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          model: string | null
+          name: string
+          price: number
+          specs: Json | null
+          status: Database["public"]["Enums"]["product_status"]
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          brand?: string | null
+          category: Database["public"]["Enums"]["product_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          model?: string | null
+          name: string
+          price: number
+          specs?: Json | null
+          status?: Database["public"]["Enums"]["product_status"]
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          brand?: string | null
+          category?: Database["public"]["Enums"]["product_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          model?: string | null
+          name?: string
+          price?: number
+          specs?: Json | null
+          status?: Database["public"]["Enums"]["product_status"]
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vendor_profiles: {
+        Row: {
+          address: string | null
+          company_name: string
+          created_at: string
+          description: string | null
+          id: string
+          is_approved: boolean
+          logo_url: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          company_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_approved?: boolean
+          logo_url?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          company_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_approved?: boolean
+          logo_url?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +182,21 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      product_category:
+        | "laptops"
+        | "desktops"
+        | "monitors"
+        | "smartphones"
+        | "tablets"
+        | "accessories"
+        | "components"
+        | "networking"
+        | "storage"
+        | "audio"
+        | "gaming"
+        | "other"
+      product_status: "pending" | "approved" | "rejected"
+      user_role: "customer" | "vendor" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +323,23 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      product_category: [
+        "laptops",
+        "desktops",
+        "monitors",
+        "smartphones",
+        "tablets",
+        "accessories",
+        "components",
+        "networking",
+        "storage",
+        "audio",
+        "gaming",
+        "other",
+      ],
+      product_status: ["pending", "approved", "rejected"],
+      user_role: ["customer", "vendor", "admin"],
+    },
   },
 } as const
