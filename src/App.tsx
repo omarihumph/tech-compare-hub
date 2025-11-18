@@ -7,6 +7,8 @@ import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Browse from "./pages/Browse";
 import Compare from "./pages/Compare";
+import VendorDashboard from "./pages/VendorDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +24,8 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/compare" element={<Compare />} />
+          <Route path="/vendor" element={<VendorDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
