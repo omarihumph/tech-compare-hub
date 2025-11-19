@@ -5,7 +5,30 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle, XCircle, LogOut, Package, Users, TrendingUp } from "lucide-react";
+import { 
+  Loader2, 
+  CheckCircle, 
+  XCircle, 
+  LogOut, 
+  Package, 
+  Users, 
+  TrendingUp, 
+  Clock,
+  BarChart3,
+  Home
+} from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 interface VendorProfile {
   id: string;
@@ -27,11 +50,24 @@ interface Product {
   status: string;
   image_url: string | null;
   vendor_id: string;
+  created_at: string;
 }
 
 interface VendorWithProfile extends Product {
   vendor_profiles: VendorProfile;
 }
+
+interface CategoryData {
+  category: string;
+  count: number;
+}
+
+interface StatusData {
+  name: string;
+  value: number;
+}
+
+const COLORS = ['hsl(220, 70%, 45%)', 'hsl(25, 100%, 55%)', 'hsl(180, 60%, 50%)', 'hsl(142, 70%, 50%)', 'hsl(38, 92%, 55%)'];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -39,10 +75,15 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [pendingVendors, setPendingVendors] = useState<VendorProfile[]>([]);
   const [pendingProducts, setPendingProducts] = useState<VendorWithProfile[]>([]);
+  const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
+  const [statusData, setStatusData] = useState<StatusData[]>([]);
   const [stats, setStats] = useState({
     totalVendors: 0,
     totalProducts: 0,
     pendingApprovals: 0,
+    approvedProducts: 0,
+    rejectedProducts: 0,
+    approvedVendors: 0,
   });
 
   useEffect(() => {
@@ -57,7 +98,6 @@ const AdminDashboard = () => {
         return;
       }
 
-      // Check if user has admin role
       const { data: roles } = await supabase
         .from("user_roles")
         .select("role")
@@ -84,7 +124,6 @@ const AdminDashboard = () => {
 
   const loadAdminData = async () => {
     try {
-      // Load pending vendors
       const { data: vendors } = await supabase
         .from("vendor_profiles")
         .select("*")
@@ -93,7 +132,6 @@ const AdminDashboard = () => {
 
       setPendingVendors(vendors || []);
 
-      // Load pending products
       const { data: products } = await supabase
         .from("products")
         .select("*, vendor_profiles(*)")
@@ -102,7 +140,32 @@ const AdminDashboard = () => {
 
       setPendingProducts(products || []);
 
-      // Load stats
+      const { data: allProducts } = await supabase
+        .from("products")
+        .select("category, status");
+
+      const categoryMap = new Map<string, number>();
+      const statusMap = { approved: 0, pending: 0, rejected: 0 };
+
+      allProducts?.forEach((product) => {
+        categoryMap.set(product.category, (categoryMap.get(product.category) || 0) + 1);
+        if (product.status === 'approved') statusMap.approved++;
+        if (product.status === 'pending') statusMap.pending++;
+        if (product.status === 'rejected') statusMap.rejected++;
+      });
+
+      const categoryChartData = Array.from(categoryMap.entries()).map(([category, count]) => ({
+        category: category.charAt(0).toUpperCase() + category.slice(1),
+        count,
+      }));
+
+      setCategoryData(categoryChartData);
+      setStatusData([
+        { name: 'Approved', value: statusMap.approved },
+        { name: 'Pending', value: statusMap.pending },
+        { name: 'Rejected', value: statusMap.rejected },
+      ]);
+
       const { count: vendorCount } = await supabase
         .from("vendor_profiles")
         .select("*", { count: "exact", head: true });
@@ -111,10 +174,28 @@ const AdminDashboard = () => {
         .from("products")
         .select("*", { count: "exact", head: true });
 
+      const { count: approvedVendorCount } = await supabase
+        .from("vendor_profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("is_approved", true);
+
+      const { count: approvedProductCount } = await supabase
+        .from("products")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "approved");
+
+      const { count: rejectedProductCount } = await supabase
+        .from("products")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "rejected");
+
       setStats({
         totalVendors: vendorCount || 0,
         totalProducts: productCount || 0,
         pendingApprovals: (vendors?.length || 0) + (products?.length || 0),
+        approvedProducts: approvedProductCount || 0,
+        rejectedProducts: rejectedProductCount || 0,
+        approvedVendors: approvedVendorCount || 0,
       });
     } catch (error) {
       console.error("Error loading admin data:", error);
@@ -133,29 +214,21 @@ const AdminDashboard = () => {
       toast({ title: "Vendor approved successfully" });
       await loadAdminData();
     } catch (error) {
-      console.error("Error approving vendor:", error);
-      toast({
-        title: "Error",
-        description: "Failed to approve vendor",
-        variant: "destructive",
-      });
+      toast({ title: "Error approving vendor", variant: "destructive" });
     }
   };
 
   const handleRejectVendor = async (vendorId: string) => {
-    if (!confirm("Are you sure you want to reject this vendor?")) return;
-
     try {
-      await supabase.from("vendor_profiles").delete().eq("id", vendorId);
-      toast({ title: "Vendor rejected" });
+      await supabase
+        .from("vendor_profiles")
+        .delete()
+        .eq("id", vendorId);
+
+      toast({ title: "Vendor rejected and removed" });
       await loadAdminData();
     } catch (error) {
-      console.error("Error rejecting vendor:", error);
-      toast({
-        title: "Error",
-        description: "Failed to reject vendor",
-        variant: "destructive",
-      });
+      toast({ title: "Error rejecting vendor", variant: "destructive" });
     }
   };
 
@@ -169,18 +242,11 @@ const AdminDashboard = () => {
       toast({ title: "Product approved successfully" });
       await loadAdminData();
     } catch (error) {
-      console.error("Error approving product:", error);
-      toast({
-        title: "Error",
-        description: "Failed to approve product",
-        variant: "destructive",
-      });
+      toast({ title: "Error approving product", variant: "destructive" });
     }
   };
 
   const handleRejectProduct = async (productId: string) => {
-    if (!confirm("Are you sure you want to reject this product?")) return;
-
     try {
       await supabase
         .from("products")
@@ -190,12 +256,7 @@ const AdminDashboard = () => {
       toast({ title: "Product rejected" });
       await loadAdminData();
     } catch (error) {
-      console.error("Error rejecting product:", error);
-      toast({
-        title: "Error",
-        description: "Failed to reject product",
-        variant: "destructive",
-      });
+      toast({ title: "Error rejecting product", variant: "destructive" });
     }
   };
 
@@ -206,211 +267,255 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
-      <div className="container mx-auto p-6">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Admin Dashboard
-            </h1>
-            <p className="text-muted-foreground mt-2">Manage vendors and products</p>
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={() => navigate("/")} variant="outline">
-              Home
-            </Button>
-            <Button onClick={handleLogout} variant="outline">
-              <LogOut className="h-4 w-4 mr-2" /> Logout
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                Admin Dashboard
+              </h1>
+              <p className="text-muted-foreground mt-1">Manage vendors, products, and platform analytics</p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => navigate("/")} className="gap-2">
+                <Home className="w-4 h-4" />
+                Home
+              </Button>
+              <Button variant="destructive" onClick={handleLogout} className="gap-2">
+                <LogOut className="w-4 h-4" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card>
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="border-primary/20 hover:border-primary/40 transition-all hover:shadow-glow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Vendors
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Vendors</CardTitle>
+              <Users className="w-5 h-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{stats.totalVendors}</div>
+              <div className="text-3xl font-bold text-foreground">{stats.totalVendors}</div>
+              <p className="text-xs text-success mt-1">{stats.approvedVendors} approved</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-accent/20 hover:border-accent/40 transition-all hover:shadow-glow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total Products
-              </CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total Products</CardTitle>
+              <Package className="w-5 h-5 text-accent" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{stats.totalProducts}</div>
+              <div className="text-3xl font-bold text-foreground">{stats.totalProducts}</div>
+              <p className="text-xs text-success mt-1">{stats.approvedProducts} approved</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-warning/20 hover:border-warning/40 transition-all hover:shadow-glow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending Approvals
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pending Approvals</CardTitle>
+              <Clock className="w-5 h-5 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{stats.pendingApprovals}</div>
+              <div className="text-3xl font-bold text-foreground">{stats.pendingApprovals}</div>
+              <p className="text-xs text-muted-foreground mt-1">Requires action</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-destructive/20 hover:border-destructive/40 transition-all hover:shadow-glow">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Rejected Products</CardTitle>
+              <XCircle className="w-5 h-5 text-destructive" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground">{stats.rejectedProducts}</div>
+              <p className="text-xs text-muted-foreground mt-1">Quality control</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs for Vendors and Products */}
-        <Tabs defaultValue="vendors" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="vendors">
-              Pending Vendors ({pendingVendors.length})
-            </TabsTrigger>
-            <TabsTrigger value="products">
-              Pending Products ({pendingProducts.length})
-            </TabsTrigger>
-          </TabsList>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card className="border-border/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                Products by Category
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={categoryData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                  <XAxis dataKey="category" className="text-muted-foreground text-xs" />
+                  <YAxis className="text-muted-foreground text-xs" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Bar dataKey="count" fill="hsl(220, 70%, 45%)" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
 
-          <TabsContent value="vendors" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pendingVendors.map((vendor) => (
-                <Card key={vendor.id}>
-                  <CardHeader>
-                    <CardTitle>{vendor.company_name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 mb-4">
-                      {vendor.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-3">
-                          {vendor.description}
-                        </p>
-                      )}
-                      {vendor.website && (
-                        <p className="text-sm">
-                          <span className="font-medium">Website:</span>{" "}
-                          <a
-                            href={vendor.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            {vendor.website}
-                          </a>
-                        </p>
-                      )}
-                      {vendor.whatsapp && (
-                        <p className="text-sm">
-                          <span className="font-medium">WhatsApp:</span> {vendor.whatsapp}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        Registered: {new Date(vendor.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleApproveVendor(vendor.id)}
-                        className="flex-1"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" /> Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleRejectVendor(vendor.id)}
-                        className="flex-1"
-                      >
-                        <XCircle className="h-4 w-4 mr-1" /> Reject
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            {pendingVendors.length === 0 && (
-              <Card className="text-center py-12">
-                <CardContent>
-                  <p className="text-muted-foreground">No pending vendors</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+          <Card className="border-border/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-accent" />
+                Product Status Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="hsl(220, 70%, 45%)"
+                    dataKey="value"
+                  >
+                    {statusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
 
-          <TabsContent value="products" className="mt-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pendingProducts.map((product) => (
-                <Card key={product.id}>
-                  <CardHeader>
-                    {product.image_url && (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-48 object-cover rounded-lg mb-4"
-                      />
-                    )}
-                    <CardTitle>{product.name}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 mb-4">
-                      <p className="text-2xl font-bold text-primary">
-                        ETB {product.price.toLocaleString()}
-                      </p>
-                      {product.brand && (
-                        <p className="text-sm text-muted-foreground">
-                          {product.brand} {product.model}
-                        </p>
-                      )}
-                      <p className="text-sm">
-                        <span className="font-medium">Category:</span>{" "}
-                        <span className="capitalize">{product.category}</span>
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Vendor:</span>{" "}
-                        {product.vendor_profiles.company_name}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleApproveProduct(product.id)}
-                        className="flex-1"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" /> Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleRejectProduct(product.id)}
-                        className="flex-1"
-                      >
-                        <XCircle className="h-4 w-4 mr-1" /> Reject
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            {pendingProducts.length === 0 && (
-              <Card className="text-center py-12">
-                <CardContent>
-                  <p className="text-muted-foreground">No pending products</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-        </Tabs>
+        <Card className="border-border/50">
+          <Tabs defaultValue="vendors" className="w-full">
+            <CardHeader>
+              <TabsList className="grid w-full grid-cols-2 max-w-md">
+                <TabsTrigger value="vendors" className="gap-2">
+                  <Users className="w-4 h-4" />
+                  Pending Vendors ({pendingVendors.length})
+                </TabsTrigger>
+                <TabsTrigger value="products" className="gap-2">
+                  <Package className="w-4 h-4" />
+                  Pending Products ({pendingProducts.length})
+                </TabsTrigger>
+              </TabsList>
+            </CardHeader>
+
+            <CardContent>
+              <TabsContent value="vendors" className="space-y-4 mt-4">
+                {pendingVendors.length === 0 ? (
+                  <div className="text-center py-12">
+                    <CheckCircle className="w-12 h-12 text-success mx-auto mb-4" />
+                    <p className="text-muted-foreground">No pending vendor approvals</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pendingVendors.map((vendor) => (
+                      <Card key={vendor.id} className="border-warning/20 bg-card/50">
+                        <CardContent className="pt-6">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold text-foreground">{vendor.company_name}</h3>
+                              {vendor.description && (
+                                <p className="text-muted-foreground mt-2">{vendor.description}</p>
+                              )}
+                              <div className="flex gap-4 mt-4 text-sm">
+                                {vendor.website && (
+                                  <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                    Website
+                                  </a>
+                                )}
+                                {vendor.whatsapp && (
+                                  <span className="text-muted-foreground">WhatsApp: {vendor.whatsapp}</span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-2 ml-4">
+                              <Button onClick={() => handleApproveVendor(vendor.id)} size="sm" className="gap-2 bg-success hover:bg-success/90">
+                                <CheckCircle className="w-4 h-4" />
+                                Approve
+                              </Button>
+                              <Button onClick={() => handleRejectVendor(vendor.id)} variant="destructive" size="sm" className="gap-2">
+                                <XCircle className="w-4 h-4" />
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="products" className="space-y-4 mt-4">
+                {pendingProducts.length === 0 ? (
+                  <div className="text-center py-12">
+                    <CheckCircle className="w-12 h-12 text-success mx-auto mb-4" />
+                    <p className="text-muted-foreground">No pending product approvals</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pendingProducts.map((product) => (
+                      <Card key={product.id} className="border-warning/20 bg-card/50">
+                        <CardContent className="pt-6">
+                          <div className="flex items-start gap-4">
+                            {product.image_url && (
+                              <img src={product.image_url} alt={product.name} className="w-24 h-24 object-cover rounded-lg border border-border" />
+                            )}
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold text-foreground">{product.name}</h3>
+                              {product.brand && <p className="text-sm text-muted-foreground">Brand: {product.brand}</p>}
+                              {product.model && <p className="text-sm text-muted-foreground">Model: {product.model}</p>}
+                              <div className="flex gap-4 mt-2">
+                                <span className="text-sm font-medium text-primary">${product.price.toLocaleString()}</span>
+                                <span className="text-sm text-muted-foreground capitalize">{product.category}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-2">Vendor: {product.vendor_profiles.company_name}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button onClick={() => handleApproveProduct(product.id)} size="sm" className="gap-2 bg-success hover:bg-success/90">
+                                <CheckCircle className="w-4 h-4" />
+                                Approve
+                              </Button>
+                              <Button onClick={() => handleRejectProduct(product.id)} variant="destructive" size="sm" className="gap-2">
+                                <XCircle className="w-4 h-4" />
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </CardContent>
+          </Tabs>
+        </Card>
       </div>
     </div>
   );
