@@ -1,6 +1,7 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Search, ShoppingCart, TrendingUp, Users, Star, Shield, Zap } from "lucide-react";
+import { ArrowRight, ShoppingCart, Star, Shield, Zap, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Carousel,
@@ -9,15 +10,47 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { ProductCard } from "@/components/ProductCard";
+import { supabase } from "@/integrations/supabase/client";
+import { useComparison } from "@/contexts/ComparisonContext";
+import { toast } from "sonner";
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  brand: string | null;
+  category: string;
+  image_url: string | null;
+}
 
 const Home = () => {
-  const featuredProducts = [
-    { name: "Galaxy Laptop Pro", price: "$1,299", category: "Laptops", image: "📱" },
-    { name: "UltraWide Monitor 49\"", price: "$899", category: "Monitors", image: "🖥️" },
-    { name: "Quantum Smartphone", price: "$999", category: "Smartphones", image: "📱" },
-    { name: "Pro Wireless Earbuds", price: "$199", category: "Audio", image: "🎧" },
-    { name: "Gaming Desktop Elite", price: "$2,499", category: "Desktops", image: "💻" },
-  ];
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { selectedProducts, toggleProduct, compareProducts } = useComparison();
+
+  useEffect(() => {
+    fetchFeaturedProducts();
+  }, []);
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, price, brand, category, image_url")
+        .eq("status", "approved")
+        .order("created_at", { ascending: false })
+        .limit(8);
+
+      if (error) throw error;
+      setFeaturedProducts(data || []);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      toast.error("Failed to load featured products");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categories = [
     { name: "Laptops", icon: "💻", count: "200+ Products" },
@@ -95,27 +128,36 @@ const Home = () => {
             </Link>
           </div>
           
-          <Carousel className="w-full">
-            <CarouselContent>
-              {featuredProducts.map((product, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                  <Card className="p-6 hover:shadow-xl transition-all duration-300 border-2">
-                    <div className="aspect-square bg-gradient-to-br from-primary/10 to-secondary/10 rounded-lg mb-4 flex items-center justify-center text-6xl">
-                      {product.image}
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">{product.category}</p>
-                      <h3 className="text-xl font-semibold">{product.name}</h3>
-                      <p className="text-2xl font-bold text-primary">{product.price}</p>
-                      <Button className="w-full mt-4">View Details</Button>
-                    </div>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="hidden md:flex" />
-            <CarouselNext className="hidden md:flex" />
-          </Carousel>
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Loading products...</p>
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No products available yet</p>
+            </div>
+          ) : (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {featuredProducts.map((product) => (
+                  <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3">
+                    <ProductCard
+                      id={product.id}
+                      name={product.name}
+                      price={product.price}
+                      brand={product.brand || undefined}
+                      category={product.category}
+                      imageUrl={product.image_url || undefined}
+                      isSelected={selectedProducts.includes(product.id)}
+                      onToggleCompare={toggleProduct}
+                    />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden md:flex" />
+              <CarouselNext className="hidden md:flex" />
+            </Carousel>
+          )}
         </div>
       </section>
 
@@ -200,6 +242,32 @@ const Home = () => {
           </Link>
         </div>
       </section>
+
+      {/* Comparison Bar */}
+      {selectedProducts.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="font-semibold">
+                  {selectedProducts.length} product{selectedProducts.length > 1 ? 's' : ''} selected
+                </span>
+                <Button onClick={compareProducts} size="lg">
+                  Compare Now
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => selectedProducts.forEach(toggleProduct)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t py-12 px-4">
