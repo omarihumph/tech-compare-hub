@@ -20,11 +20,11 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 215 25% 15%;
 
-    /* Primary - Modern Tech Blue */
-    --primary: 210 100% 50%;
+    /* Primary - Dark Blue */
+    --primary: 220 70% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 210 100% 60%;
-    --primary-dark: 210 100% 40%;
+    --primary-light: 220 70% 45%;
+    --primary-dark: 220 70% 25%;
 
     /* Secondary - Teal accent */
     --secondary: 180 60% 50%;
@@ -34,8 +34,8 @@ All colors MUST be HSL.
     --muted: 215 20% 96%;
     --muted-foreground: 215 15% 45%;
 
-    /* Accent - Electric Blue */
-    --accent: 195 100% 50%;
+    /* Accent - Orange */
+    --accent: 25 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
@@ -59,26 +59,26 @@ All colors MUST be HSL.
     --radius: 0.5rem;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 50%), hsl(195 100% 50%));
-    --gradient-secondary: linear-gradient(135deg, hsl(180 60% 50%), hsl(210 100% 50%));
-    --gradient-hero: linear-gradient(135deg, hsl(210 100% 50% / 0.1), hsl(195 100% 50% / 0.05));
+    --gradient-primary: linear-gradient(135deg, hsl(220 70% 35%), hsl(25 100% 50%));
+    --gradient-secondary: linear-gradient(135deg, hsl(180 60% 50%), hsl(220 70% 35%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 70% 35% / 0.1), hsl(25 100% 50% / 0.05));
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(215 25% 15% / 0.05);
     --shadow: 0 4px 6px -1px hsl(215 25% 15% / 0.1);
     --shadow-md: 0 10px 15px -3px hsl(215 25% 15% / 0.1);
     --shadow-lg: 0 20px 25px -5px hsl(215 25% 15% / 0.1);
-    --shadow-glow: 0 0 20px hsl(210 100% 50% / 0.3);
+    --shadow-glow: 0 0 20px hsl(25 100% 50% / 0.3);
 
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 215 25% 25%;
-    --sidebar-primary: 210 100% 50%;
+    --sidebar-primary: 220 70% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 215 20% 96%;
     --sidebar-accent-foreground: 215 25% 25%;
     --sidebar-border: 215 20% 88%;
-    --sidebar-ring: 210 100% 50%;
+    --sidebar-ring: 220 70% 35%;
 
     /* Animations */
     --transition-base: all 0.2s ease-in-out;
@@ -99,10 +99,10 @@ All colors MUST be HSL.
     --popover-foreground: 210 20% 95%;
 
     /* Primary - Brighter in dark mode */
-    --primary: 210 100% 55%;
+    --primary: 220 70% 45%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 210 100% 65%;
-    --primary-dark: 210 100% 45%;
+    --primary-light: 220 70% 55%;
+    --primary-dark: 220 70% 35%;
 
     /* Secondary */
     --secondary: 180 60% 45%;
@@ -113,7 +113,7 @@ All colors MUST be HSL.
     --muted-foreground: 215 15% 65%;
 
     /* Accent */
-    --accent: 195 100% 55%;
+    --accent: 25 100% 55%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive */
@@ -134,26 +134,26 @@ All colors MUST be HSL.
     --ring: 210 100% 55%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(210 100% 55%), hsl(195 100% 55%));
-    --gradient-secondary: linear-gradient(135deg, hsl(180 60% 45%), hsl(210 100% 55%));
-    --gradient-hero: linear-gradient(135deg, hsl(210 100% 55% / 0.15), hsl(195 100% 55% / 0.05));
+    --gradient-primary: linear-gradient(135deg, hsl(220 70% 45%), hsl(25 100% 55%));
+    --gradient-secondary: linear-gradient(135deg, hsl(180 60% 45%), hsl(220 70% 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(220 70% 45% / 0.15), hsl(25 100% 55% / 0.05));
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.15);
     --shadow: 0 4px 6px -1px hsl(0 0% 0% / 0.2);
     --shadow-md: 0 10px 15px -3px hsl(0 0% 0% / 0.25);
     --shadow-lg: 0 20px 25px -5px hsl(0 0% 0% / 0.3);
-    --shadow-glow: 0 0 20px hsl(210 100% 55% / 0.4);
+    --shadow-glow: 0 0 20px hsl(25 100% 55% / 0.4);
 
     /* Sidebar */
     --sidebar-background: 215 28% 10%;
     --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 210 100% 55%;
+    --sidebar-primary: 220 70% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 215 25% 16%;
     --sidebar-accent-foreground: 210 20% 85%;
     --sidebar-border: 215 25% 20%;
-    --sidebar-ring: 210 100% 55%;
+    --sidebar-ring: 220 70% 45%;
   }
 }
 
