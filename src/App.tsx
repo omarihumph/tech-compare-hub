@@ -27,7 +27,7 @@ const App = () => (
             <Route path="/browse" element={<Browse />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/vendor" element={<VendorDashboard />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
