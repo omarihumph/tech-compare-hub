@@ -57,7 +57,7 @@ const Auth = () => {
         .single();
 
       if (profile?.role === "vendor") {
-        navigate("/vendor/dashboard");
+        navigate("/vendor");
       } else if (profile?.role === "admin") {
         navigate("/admin/dashboard");
       } else {
