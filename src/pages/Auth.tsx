@@ -53,9 +53,10 @@ const Auth = () => {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const fullName = formData.get("fullName") as string;
+    const companyName = formData.get("companyName") as string;
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -68,6 +69,35 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      // If vendor signup and user created, create vendor profile
+      if (isVendorMode && data.user) {
+        const { error: vendorError } = await supabase
+          .from("vendor_profiles")
+          .insert({
+            user_id: data.user.id,
+            company_name: companyName || fullName,
+            is_approved: false,
+          });
+
+        if (vendorError) {
+          console.error("Error creating vendor profile:", vendorError);
+          toast.error("Account created but vendor profile setup failed. Please contact support.");
+          return;
+        }
+
+        // Add vendor role to user_roles
+        const { error: roleError } = await supabase
+          .from("user_roles")
+          .insert({
+            user_id: data.user.id,
+            role: "vendor",
+          });
+
+        if (roleError) {
+          console.error("Error adding vendor role:", roleError);
+        }
+      }
 
       toast.success("Account created! Please check your email to verify.");
     } catch (error: any) {
@@ -171,6 +201,17 @@ const Auth = () => {
                     required
                   />
                 </div>
+                {isVendorMode && (
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-company">Company Name</Label>
+                    <Input
+                      id="signup-company"
+                      name="companyName"
+                      placeholder="Your Company Ltd."
+                      required
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
