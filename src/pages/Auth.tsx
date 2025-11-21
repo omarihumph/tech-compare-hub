@@ -20,32 +20,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session) {
-          // Redirect based on user role
-          setTimeout(() => {
-            checkUserRoleAndRedirect(session.user.id);
-          }, 0);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session) {
-        checkUserRoleAndRedirect(session.user.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    // Logout any existing session
+    supabase.auth.signOut();
   }, []);
 
   const checkUserRoleAndRedirect = async (userId: string) => {
@@ -118,6 +94,12 @@ const Auth = () => {
       if (error) throw error;
 
       toast.success("Signed in successfully!");
+      
+      // Redirect after successful login
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        checkUserRoleAndRedirect(user.id);
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to sign in");
     } finally {
