@@ -74,6 +74,7 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [pendingVendors, setPendingVendors] = useState<VendorProfile[]>([]);
+  const [allVendors, setAllVendors] = useState<VendorProfile[]>([]);
   const [pendingProducts, setPendingProducts] = useState<VendorWithProfile[]>([]);
   const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
   const [statusData, setStatusData] = useState<StatusData[]>([]);
@@ -131,6 +132,13 @@ const AdminDashboard = () => {
         .order("created_at", { ascending: false });
 
       setPendingVendors(vendors || []);
+
+      const { data: allVendorsData } = await supabase
+        .from("vendor_profiles")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      setAllVendors(allVendorsData || []);
 
       const { data: products } = await supabase
         .from("products")
@@ -410,11 +418,15 @@ const AdminDashboard = () => {
         </div>
 
         <Card className="border-border/50">
-          <Tabs defaultValue="vendors" className="w-full">
+          <Tabs defaultValue="all-vendors" className="w-full">
             <CardHeader>
-              <TabsList className="grid w-full grid-cols-2 max-w-md">
-                <TabsTrigger value="vendors" className="gap-2">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="all-vendors" className="gap-2">
                   <Users className="w-4 h-4" />
+                  All Vendors ({allVendors.length})
+                </TabsTrigger>
+                <TabsTrigger value="vendors" className="gap-2">
+                  <Clock className="w-4 h-4" />
                   Pending Vendors ({pendingVendors.length})
                 </TabsTrigger>
                 <TabsTrigger value="products" className="gap-2">
@@ -425,6 +437,89 @@ const AdminDashboard = () => {
             </CardHeader>
 
             <CardContent>
+              <TabsContent value="all-vendors" className="mt-4">
+                {allVendors.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">No vendors registered yet</p>
+                  </div>
+                ) : (
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-muted/50">
+                        <tr>
+                          <th className="text-left p-4 font-semibold text-sm">Company</th>
+                          <th className="text-left p-4 font-semibold text-sm">Status</th>
+                          <th className="text-left p-4 font-semibold text-sm">Contact</th>
+                          <th className="text-left p-4 font-semibold text-sm">Joined</th>
+                          <th className="text-right p-4 font-semibold text-sm">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {allVendors.map((vendor) => (
+                          <tr key={vendor.id} className="hover:bg-muted/30 transition-colors">
+                            <td className="p-4">
+                              <div>
+                                <p className="font-medium text-foreground">{vendor.company_name}</p>
+                                {vendor.description && (
+                                  <p className="text-sm text-muted-foreground line-clamp-1">{vendor.description}</p>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-4">
+                              {vendor.is_approved ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success">
+                                  <CheckCircle className="w-3 h-3" />
+                                  Approved
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
+                                  <Clock className="w-3 h-3" />
+                                  Pending
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-4">
+                              <div className="text-sm space-y-1">
+                                {vendor.website && (
+                                  <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline block">
+                                    Website
+                                  </a>
+                                )}
+                                {vendor.whatsapp && (
+                                  <p className="text-muted-foreground">{vendor.whatsapp}</p>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-4 text-sm text-muted-foreground">
+                              {new Date(vendor.created_at).toLocaleDateString()}
+                            </td>
+                            <td className="p-4">
+                              <div className="flex gap-2 justify-end">
+                                {!vendor.is_approved && (
+                                  <Button onClick={() => handleApproveVendor(vendor.id)} size="sm" variant="outline" className="gap-1">
+                                    <CheckCircle className="w-3 h-3" />
+                                    Approve
+                                  </Button>
+                                )}
+                                <Button 
+                                  onClick={() => window.open('/vendor', '_blank')} 
+                                  size="sm" 
+                                  variant="secondary"
+                                  className="gap-1"
+                                >
+                                  View Panel
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </TabsContent>
+
               <TabsContent value="vendors" className="space-y-4 mt-4">
                 {pendingVendors.length === 0 ? (
                   <div className="text-center py-12">
