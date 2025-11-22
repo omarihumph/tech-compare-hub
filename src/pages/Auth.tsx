@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { User, Session } from "@supabase/supabase-js";
@@ -13,11 +14,11 @@ import { User, Session } from "@supabase/supabase-js";
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const isVendorMode = searchParams.get("vendor") === "true";
   
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
+  const [userType, setUserType] = useState<"customer" | "vendor">("customer");
 
   useEffect(() => {
     // Logout any existing session
@@ -63,7 +64,7 @@ const Auth = () => {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName,
-            role: isVendorMode ? "vendor" : "customer",
+            role: userType,
           },
         },
       });
@@ -71,7 +72,7 @@ const Auth = () => {
       if (error) throw error;
 
       // If vendor signup and user created, create vendor profile
-      if (isVendorMode && data.user) {
+      if (userType === "vendor" && data.user) {
         const { error: vendorError } = await supabase
           .from("vendor_profiles")
           .insert({
@@ -103,7 +104,7 @@ const Auth = () => {
       
       // Redirect based on user type
       if (data.user) {
-        if (isVendorMode) {
+        if (userType === "vendor") {
           navigate("/vendor");
         } else {
           navigate("/browse");
@@ -156,13 +157,9 @@ const Auth = () => {
               TechPrice
             </span>
           </div>
-          <CardTitle className="text-2xl">
-            {isVendorMode ? "Vendor Account" : "Welcome back"}
-          </CardTitle>
+          <CardTitle className="text-2xl">Welcome back</CardTitle>
           <CardDescription>
-            {isVendorMode
-              ? "Create your vendor account to start listing products"
-              : "Sign in to your account or create a new one"}
+            Sign in to your account or create a new one
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -201,6 +198,24 @@ const Auth = () => {
 
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-3">
+                  <Label>Account Type</Label>
+                  <RadioGroup value={userType} onValueChange={(value) => setUserType(value as "customer" | "vendor")}>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="customer" id="customer" />
+                      <Label htmlFor="customer" className="font-normal cursor-pointer">
+                        Customer - Browse and compare products
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="vendor" id="vendor" />
+                      <Label htmlFor="vendor" className="font-normal cursor-pointer">
+                        Vendor - List and sell products
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Full Name</Label>
                   <Input
@@ -210,7 +225,8 @@ const Auth = () => {
                     required
                   />
                 </div>
-                {isVendorMode && (
+                
+                {userType === "vendor" && (
                   <div className="space-y-2">
                     <Label htmlFor="signup-company">Company Name</Label>
                     <Input
@@ -221,6 +237,7 @@ const Auth = () => {
                     />
                   </div>
                 )}
+                
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input
@@ -248,23 +265,6 @@ const Auth = () => {
             </TabsContent>
           </Tabs>
 
-          <div className="mt-4 text-center text-sm text-muted-foreground">
-            {isVendorMode ? (
-              <p>
-                Not a vendor?{" "}
-                <a href="/auth" className="text-primary hover:underline">
-                  Sign in as customer
-                </a>
-              </p>
-            ) : (
-              <p>
-                Want to sell products?{" "}
-                <a href="/auth?vendor=true" className="text-primary hover:underline">
-                  Become a vendor
-                </a>
-              </p>
-            )}
-          </div>
         </CardContent>
       </Card>
     </div>
