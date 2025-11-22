@@ -100,6 +100,15 @@ const Auth = () => {
       }
 
       toast.success("Account created! Please check your email to verify.");
+      
+      // Redirect based on user type
+      if (data.user) {
+        if (isVendorMode) {
+          navigate("/vendor");
+        } else {
+          navigate("/browse");
+        }
+      }
     } catch (error: any) {
       toast.error(error.message || "Failed to sign up");
     } finally {
