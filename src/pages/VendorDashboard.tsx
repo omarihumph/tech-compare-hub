@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit, Trash2, Upload, LogOut } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Upload, LogOut, Clock, AlertCircle } from "lucide-react";
 
 interface VendorProfile {
   id: string;
@@ -301,26 +302,6 @@ const VendorDashboard = () => {
     );
   }
 
-  if (!vendorProfile.is_approved) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="max-w-md w-full">
-          <CardHeader>
-            <CardTitle>Pending Approval</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              Your vendor profile is pending approval. Please wait for admin approval.
-            </p>
-            <Button onClick={handleLogout} variant="outline">
-              <LogOut className="h-4 w-4 mr-2" /> Logout
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       <div className="container mx-auto p-6">
@@ -340,6 +321,19 @@ const VendorDashboard = () => {
             </Button>
           </div>
         </div>
+
+        {!vendorProfile.is_approved && (
+          <Alert className="mb-6 border-amber-500/50 bg-amber-500/10">
+            <Clock className="h-5 w-5 text-amber-600" />
+            <AlertTitle className="text-amber-900 dark:text-amber-100 font-semibold">
+              Account Pending Approval
+            </AlertTitle>
+            <AlertDescription className="text-amber-800 dark:text-amber-200">
+              Your vendor account is currently under review by our admin team. You can add products now, 
+              but they won't be visible to customers until your account is approved. We'll notify you once approved.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">My Products</h2>
