@@ -8,12 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ShoppingCart } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { User, Session } from "@supabase/supabase-js";
 
 const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { toast } = useToast();
   
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -69,10 +70,21 @@ const Auth = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Signup error:", error);
+        throw error;
+      }
 
-      // If vendor signup and user created, create vendor profile
-      if (userType === "vendor" && data.user) {
+      if (!data.user) {
+        throw new Error("No user data returned from signup");
+      }
+
+      console.log("User created:", data.user.id);
+
+      // If vendor signup, create vendor profile and role
+      if (userType === "vendor") {
+        console.log("Creating vendor profile...");
+        
         const { error: vendorError } = await supabase
           .from("vendor_profiles")
           .insert({
@@ -83,9 +95,15 @@ const Auth = () => {
 
         if (vendorError) {
           console.error("Error creating vendor profile:", vendorError);
-          toast.error("Account created but vendor profile setup failed. Please contact support.");
+          toast({
+            title: "Error",
+            description: "Account created but vendor profile setup failed. Please contact support.",
+            variant: "destructive",
+          });
           return;
         }
+
+        console.log("Vendor profile created successfully");
 
         // Add vendor role to user_roles
         const { error: roleError } = await supabase
@@ -97,21 +115,37 @@ const Auth = () => {
 
         if (roleError) {
           console.error("Error adding vendor role:", roleError);
+          toast({
+            title: "Error",
+            description: "Account created but role assignment failed. Please contact support.",
+            variant: "destructive",
+          });
+          return;
         }
+
+        console.log("Vendor role added successfully");
       }
 
-      toast.success("Account created! Please check your email to verify.");
+      toast({
+        title: "Success",
+        description: "Account created! Please check your email to verify.",
+      });
       
-      // Redirect based on user type
-      if (data.user) {
+      // Wait a bit before redirect to ensure DB operations complete
+      setTimeout(() => {
         if (userType === "vendor") {
           navigate("/vendor");
         } else {
           navigate("/browse");
         }
-      }
+      }, 500);
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign up");
+      console.error("Signup error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sign up",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -133,7 +167,10 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast.success("Signed in successfully!");
+      toast({
+        title: "Success",
+        description: "Signed in successfully!",
+      });
       
       // Redirect after successful login
       const { data: { user } } = await supabase.auth.getUser();
@@ -141,7 +178,11 @@ const Auth = () => {
         checkUserRoleAndRedirect(user.id);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to sign in");
+      toast({
+        title: "Error",
+        description: error.message || "Failed to sign in",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
