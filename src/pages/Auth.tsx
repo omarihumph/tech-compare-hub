@@ -85,6 +85,13 @@ const Auth = () => {
       if (userType === "vendor") {
         console.log("Creating vendor profile...");
         
+        // Wait a moment for the session to be fully established
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Get the current session to ensure we're authenticated
+        const { data: sessionData } = await supabase.auth.getSession();
+        console.log("Session established:", !!sessionData.session);
+        
         const { error: vendorError } = await supabase
           .from("vendor_profiles")
           .insert({
