@@ -81,7 +81,7 @@ const Auth = () => {
 
       console.log("User created:", data.user.id);
 
-      // If vendor signup, create vendor profile and role
+      // If vendor signup, create vendor profile (trigger will add role automatically)
       if (userType === "vendor") {
         console.log("Creating vendor profile...");
         
@@ -103,27 +103,7 @@ const Auth = () => {
           return;
         }
 
-        console.log("Vendor profile created successfully");
-
-        // Add vendor role to user_roles
-        const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert({
-            user_id: data.user.id,
-            role: "vendor",
-          });
-
-        if (roleError) {
-          console.error("Error adding vendor role:", roleError);
-          toast({
-            title: "Error",
-            description: "Account created but role assignment failed. Please contact support.",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        console.log("Vendor role added successfully");
+        console.log("Vendor profile and role created successfully via trigger");
       }
 
       toast({
