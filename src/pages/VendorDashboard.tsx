@@ -71,15 +71,31 @@ const VendorDashboard = () => {
         return;
       }
 
-      // Check if user has vendor role
-      const { data: roles } = await supabase
+      console.log("Checking vendor access for user:", user.id);
+
+      // Check if user has vendor role - use maybeSingle to avoid error on no rows
+      const { data: roles, error: roleError } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
         .eq("role", "vendor")
-        .single();
+        .maybeSingle();
+
+      console.log("Role check result:", { roles, roleError });
+
+      if (roleError) {
+        console.error("Error fetching role:", roleError);
+        toast({
+          title: "Error",
+          description: "Failed to verify access permissions",
+          variant: "destructive",
+        });
+        navigate("/");
+        return;
+      }
 
       if (!roles) {
+        console.log("No vendor role found for user");
         toast({
           title: "Access Denied",
           description: "You need vendor role to access this page",
@@ -89,6 +105,7 @@ const VendorDashboard = () => {
         return;
       }
 
+      console.log("Vendor access granted, loading data...");
       await loadVendorData(user.id);
     } catch (error) {
       console.error("Error checking access:", error);
