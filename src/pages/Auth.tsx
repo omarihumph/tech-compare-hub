@@ -66,6 +66,7 @@ const Auth = () => {
           data: {
             full_name: fullName,
             role: userType,
+            company_name: userType === "vendor" ? companyName : undefined,
           },
         },
       });
@@ -80,42 +81,14 @@ const Auth = () => {
       }
 
       console.log("User created:", data.user.id);
-
-      // If vendor signup, create vendor profile (trigger will add role automatically)
-      if (userType === "vendor") {
-        console.log("Creating vendor profile...");
-        
-        // Wait a moment for the session to be fully established
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Get the current session to ensure we're authenticated
-        const { data: sessionData } = await supabase.auth.getSession();
-        console.log("Session established:", !!sessionData.session);
-        
-        const { error: vendorError } = await supabase
-          .from("vendor_profiles")
-          .insert({
-            user_id: data.user.id,
-            company_name: companyName || fullName,
-            is_approved: false,
-          });
-
-        if (vendorError) {
-          console.error("Error creating vendor profile:", vendorError);
-          toast({
-            title: "Error",
-            description: "Account created but vendor profile setup failed. Please contact support.",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        console.log("Vendor profile and role created successfully via trigger");
-      }
+      
+      // Database triggers will automatically create vendor_profiles and user_roles
 
       toast({
         title: "Success",
-        description: "Account created! Please check your email to verify.",
+        description: userType === "vendor" 
+          ? "Vendor account created! Please check your email to verify." 
+          : "Account created! Please check your email to verify.",
       });
       
       // Wait a bit before redirect to ensure DB operations complete
