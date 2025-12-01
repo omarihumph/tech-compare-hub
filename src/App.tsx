@@ -9,8 +9,10 @@ import Auth from "./pages/Auth";
 import Browse from "./pages/Browse";
 import Compare from "./pages/Compare";
 import VendorDashboard from "./pages/VendorDashboard";
+import VendorOnboard from "./pages/VendorOnboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import VendorProtectedRoute from "./components/VendorProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -26,7 +28,15 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/browse" element={<Browse />} />
             <Route path="/compare" element={<Compare />} />
-            <Route path="/vendor" element={<VendorDashboard />} />
+            <Route path="/vendor/onboard" element={<VendorOnboard />} />
+            <Route 
+              path="/vendor" 
+              element={
+                <VendorProtectedRoute>
+                  <VendorDashboard />
+                </VendorProtectedRoute>
+              } 
+            />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
