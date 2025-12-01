@@ -27,11 +27,30 @@ interface Product {
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [isVendor, setIsVendor] = useState(false);
   const { selectedProducts, toggleProduct, compareProducts } = useComparison();
 
   useEffect(() => {
     fetchFeaturedProducts();
+    checkUserStatus();
   }, []);
+
+  const checkUserStatus = async () => {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    setUser(authUser);
+
+    if (authUser) {
+      const { data: vendorRole } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", authUser.id)
+        .eq("role", "vendor")
+        .maybeSingle();
+      
+      setIsVendor(!!vendorRole);
+    }
+  };
 
   const fetchFeaturedProducts = async () => {
     try {
@@ -74,12 +93,28 @@ const Home = () => {
             <Link to="/browse">
               <Button variant="ghost" className="hidden sm:inline-flex">Browse</Button>
             </Link>
-            <Link to="/auth">
-              <Button variant="ghost">Sign In</Button>
-            </Link>
-            <Link to="/auth?vendor=true">
-              <Button>Become a Vendor</Button>
-            </Link>
+            {user ? (
+              <>
+                {isVendor ? (
+                  <Link to="/vendor">
+                    <Button>Vendor Dashboard</Button>
+                  </Link>
+                ) : (
+                  <Link to="/vendor/onboard">
+                    <Button>Become a Vendor</Button>
+                  </Link>
+                )}
+              </>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
+                <Link to="/auth?vendor=true">
+                  <Button>Become a Vendor</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
