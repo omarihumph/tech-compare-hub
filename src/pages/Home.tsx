@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, ShoppingCart, Star, Shield, Zap, X } from "lucide-react";
+import { ArrowRight, ShoppingCart, Star, Shield, Zap, X, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Carousel,
@@ -81,101 +81,142 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-hidden">
+      {/* Abstract background blobs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-blob-1 animate-float" style={{ animationDelay: "0s" }} />
+        <div className="absolute top-0 right-0 w-full h-full bg-blob-2 animate-float" style={{ animationDelay: "1s" }} />
+        <div className="absolute bottom-0 left-0 w-full h-full bg-blob-3 animate-float" style={{ animationDelay: "2s" }} />
+        <div className="absolute bottom-0 right-0 w-full h-full bg-blob-4 animate-float" style={{ animationDelay: "3s" }} />
+      </div>
+
       {/* Navigation */}
-      <nav className="border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShoppingCart className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">TechPrice</span>
+      <nav className="relative border-b border-border/50 bg-background/40 backdrop-blur-xl sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow">
+              <ShoppingCart className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight">TechPrice</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Link to="/browse">
-              <Button variant="ghost" className="hidden sm:inline-flex">Browse</Button>
+          <div className="hidden md:flex items-center gap-8">
+            <Link to="/" className="text-foreground/90 hover:text-foreground transition-colors">
+              Home
             </Link>
+            <Link to="/browse" className="text-foreground/90 hover:text-foreground transition-colors">
+              Products
+            </Link>
+            <Link to="/compare" className="text-foreground/90 hover:text-foreground transition-colors">
+              Compare
+            </Link>
+          </div>
+          <div className="flex items-center gap-3">
             {user ? (
               <>
                 {isVendor ? (
                   <Link to="/vendor">
-                    <Button>Vendor Dashboard</Button>
+                    <Button size="sm">Dashboard</Button>
                   </Link>
                 ) : (
                   <Link to="/vendor/onboard">
-                    <Button>Become a Vendor</Button>
+                    <Button size="sm">Become a Vendor</Button>
                   </Link>
                 )}
               </>
             ) : (
               <>
                 <Link to="/auth">
-                  <Button variant="ghost">Sign In</Button>
+                  <Button variant="ghost" size="sm">Sign In</Button>
                 </Link>
                 <Link to="/auth?vendor=true">
-                  <Button>Become a Vendor</Button>
+                  <Button size="sm">Get Started</Button>
                 </Link>
               </>
             )}
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Menu className="h-5 w-5" />
+            </Button>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section - Samsung Style */}
-      <section className="relative h-[600px] md:h-[700px] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
-        <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 tracking-tight">
-            The Future of
-            <br />
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Tech Shopping
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl">
-            Compare. Discover. Decide. Find the perfect tech products from verified vendors.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link to="/browse">
-              <Button size="lg" className="text-base px-8 h-12">
-                Explore Products
-              </Button>
-            </Link>
-            <Link to="/compare">
-              <Button size="lg" variant="outline" className="text-base px-8 h-12">
-                Compare Now
-              </Button>
-            </Link>
+      {/* Hero Section - Abstract Modern Design */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden px-6">
+        <div className="relative container mx-auto max-w-7xl">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8 animate-slide-in">
+              <div className="inline-block">
+                <div className="px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
+                  <span className="text-sm font-semibold text-primary">✨ Compare. Decide. Win.</span>
+                </div>
+              </div>
+              <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-none">
+                Abstract
+                <br />
+                <span className="bg-gradient-primary bg-clip-text text-transparent">
+                  Tech Shopping
+                </span>
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-xl leading-relaxed">
+                Experience the future of tech product comparison. Find verified vendors, compare specs instantly, and make confident decisions.
+              </p>
+              <div className="flex flex-wrap gap-4 pt-4">
+                <Link to="/browse">
+                  <Button size="lg" className="group">
+                    Explore Products
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
+                <Link to="/compare">
+                  <Button size="lg" variant="outline">
+                    Start Comparing
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            
+            {/* Abstract shape decoration */}
+            <div className="hidden lg:flex items-center justify-center relative">
+              <div className="relative w-full h-[500px]">
+                <div className="absolute inset-0 bg-gradient-primary rounded-full blur-3xl opacity-30 animate-glow-pulse" />
+                <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-secondary rounded-full blur-2xl opacity-40 animate-float" />
+                <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-accent rounded-full blur-2xl opacity-30 animate-float" style={{ animationDelay: "2s" }} />
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Products Carousel */}
-      <section className="py-16 px-4 bg-muted/30">
+      {/* Featured Products */}
+      <section className="relative py-24 px-6">
         <div className="container mx-auto max-w-7xl">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">Featured Products</h2>
-              <p className="text-muted-foreground">Handpicked deals from verified vendors</p>
+          <div className="flex items-end justify-between mb-12">
+            <div className="space-y-2">
+              <h2 className="text-5xl font-bold tracking-tight">Featured Products</h2>
+              <p className="text-lg text-muted-foreground">Handpicked deals from verified vendors</p>
             </div>
-            <Link to="/browse">
-              <Button variant="ghost" className="hidden sm:inline-flex">
-                View All <ArrowRight className="ml-2 h-4 w-4" />
+            <Link to="/browse" className="hidden sm:block">
+              <Button variant="ghost" className="group">
+                View All 
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </div>
           
           {loading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Loading products...</p>
+            <div className="text-center py-20">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
+              <p className="text-muted-foreground mt-4">Loading products...</p>
             </div>
           ) : featuredProducts.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No products available yet</p>
+            <div className="text-center py-20">
+              <p className="text-muted-foreground text-lg">No products available yet</p>
             </div>
           ) : (
             <Carousel className="w-full">
-              <CarouselContent>
+              <CarouselContent className="-ml-4">
                 {featuredProducts.map((product) => (
-                  <CarouselItem key={product.id} className="md:basis-1/2 lg:basis-1/3">
+                  <CarouselItem key={product.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
                     <ProductCard
                       id={product.id}
                       name={product.name}
@@ -189,28 +230,31 @@ const Home = () => {
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious className="hidden md:flex" />
-              <CarouselNext className="hidden md:flex" />
+              <CarouselPrevious className="hidden md:flex -left-6" />
+              <CarouselNext className="hidden md:flex -right-6" />
             </Carousel>
           )}
         </div>
       </section>
 
       {/* Categories Grid */}
-      <section className="py-16 px-4">
+      <section className="relative py-24 px-6">
         <div className="container mx-auto max-w-7xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+          <h2 className="text-5xl font-bold text-center mb-16 tracking-tight">
             Shop by Category
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {categories.map((category, index) => (
               <Link to="/browse" key={index}>
-                <Card className="p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 text-center cursor-pointer group">
-                  <div className="text-5xl mb-3 group-hover:scale-110 transition-transform">
-                    {category.icon}
+                <Card className="relative p-8 hover:scale-110 transition-all duration-500 text-center cursor-pointer group overflow-hidden border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-glow">
+                  <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
+                  <div className="relative">
+                    <div className="text-6xl mb-4 group-hover:scale-125 transition-transform duration-500">
+                      {category.icon}
+                    </div>
+                    <h3 className="font-bold text-lg mb-1">{category.name}</h3>
+                    <p className="text-sm text-muted-foreground">{category.count}</p>
                   </div>
-                  <h3 className="font-semibold mb-1">{category.name}</h3>
-                  <p className="text-sm text-muted-foreground">{category.count}</p>
                 </Card>
               </Link>
             ))}
@@ -218,78 +262,96 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section - Samsung Style */}
-      <section className="py-16 px-4 bg-muted/30">
+      {/* Features Section */}
+      <section className="relative py-24 px-6">
         <div className="container mx-auto max-w-7xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+          <h2 className="text-5xl font-bold text-center mb-16 tracking-tight">
             Why Choose TechPrice?
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2">
-              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                <Shield className="h-7 w-7 text-primary" />
+            <Card className="relative p-10 hover:scale-105 transition-all duration-500 border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group hover:shadow-glow">
+              <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+              <div className="relative space-y-6">
+                <div className="h-16 w-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-glow">
+                  <Shield className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold">Verified Vendors</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Every vendor is thoroughly verified to ensure authenticity and quality. Shop with complete confidence.
+                </p>
               </div>
-              <h3 className="text-2xl font-semibold mb-3">Verified Vendors</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Every vendor is thoroughly verified to ensure authenticity and quality. Shop with confidence.
-              </p>
             </Card>
 
-            <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2">
-              <div className="h-14 w-14 rounded-full bg-secondary/10 flex items-center justify-center mb-6">
-                <Zap className="h-7 w-7 text-secondary" />
+            <Card className="relative p-10 hover:scale-105 transition-all duration-500 border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group hover:shadow-glow">
+              <div className="absolute inset-0 bg-gradient-accent opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+              <div className="relative space-y-6">
+                <div className="h-16 w-16 rounded-2xl bg-gradient-accent flex items-center justify-center shadow-glow-pink">
+                  <Zap className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold">Instant Compare</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Compare specifications, prices, and features across multiple vendors in real-time with our advanced tools.
+                </p>
               </div>
-              <h3 className="text-2xl font-semibold mb-3">Instant Compare</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Compare specifications, prices, and features across multiple vendors in real-time.
-              </p>
             </Card>
 
-            <Card className="p-8 hover:shadow-xl transition-all duration-300 border-2">
-              <div className="h-14 w-14 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                <Star className="h-7 w-7 text-accent" />
+            <Card className="relative p-10 hover:scale-105 transition-all duration-500 border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden group hover:shadow-glow">
+              <div className="absolute inset-0 bg-gradient-secondary opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+              <div className="relative space-y-6">
+                <div className="h-16 w-16 rounded-2xl bg-gradient-secondary flex items-center justify-center shadow-glow">
+                  <Star className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold">Best Prices</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Find the most competitive prices in the market. Save more on every purchase with our price comparison.
+                </p>
               </div>
-              <h3 className="text-2xl font-semibold mb-3">Best Prices</h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Find the most competitive prices in the market. Save more on every purchase.
-              </p>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* CTA Section - Bold Samsung Style */}
-      <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Ready to Find Your
-            <br />
-            Perfect Tech Match?
-          </h2>
-          <p className="text-lg md:text-xl text-muted-foreground mb-10">
-            Join thousands of smart shoppers making informed decisions every day
-          </p>
-          <Link to="/browse">
-            <Button size="lg" className="text-base px-10 h-14 text-lg">
-              Start Shopping Now
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+      {/* CTA Section */}
+      <section className="relative py-32 px-6">
+        <div className="container mx-auto max-w-5xl text-center">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-primary rounded-3xl blur-3xl opacity-20" />
+            <div className="relative space-y-8">
+              <h2 className="text-6xl md:text-7xl font-bold tracking-tighter leading-tight">
+                Ready to Find Your
+                <br />
+                <span className="bg-gradient-accent bg-clip-text text-transparent">
+                  Perfect Match?
+                </span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Join thousands of smart shoppers making informed decisions every day
+              </p>
+              <div className="pt-4">
+                <Link to="/browse">
+                  <Button size="lg" className="group text-lg px-12 py-8 h-auto">
+                    Start Shopping Now
+                    <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Comparison Bar */}
       {selectedProducts.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t shadow-lg z-50">
-          <div className="container mx-auto px-4 py-4">
+        <div className="fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-t border-border/50 shadow-2xl z-50">
+          <div className="container mx-auto px-6 py-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="font-semibold">
+                <span className="font-bold text-lg">
                   {selectedProducts.length} product{selectedProducts.length > 1 ? 's' : ''} selected
                 </span>
                 <Button onClick={compareProducts} size="lg">
                   Compare Now
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </div>
               <Button
@@ -305,41 +367,43 @@ const Home = () => {
       )}
 
       {/* Footer */}
-      <footer className="border-t py-12 px-4">
+      <footer className="relative border-t border-border/50 py-16 px-6 bg-card/30 backdrop-blur-sm">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <ShoppingCart className="h-6 w-6 text-primary" />
-                <span className="text-lg font-bold">TechPrice</span>
+          <div className="grid md:grid-cols-4 gap-12 mb-12">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow">
+                  <ShoppingCart className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-xl font-bold">TechPrice</span>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground">
                 Your trusted tech product comparison platform.
               </p>
             </div>
-            <div>
-              <h4 className="font-semibold mb-4">For Customers</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/browse" className="hover:text-primary">Browse Products</Link></li>
-                <li><Link to="/compare" className="hover:text-primary">Compare</Link></li>
+            <div className="space-y-3">
+              <h4 className="font-bold text-lg">For Customers</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/browse" className="hover:text-primary transition-colors">Browse Products</Link></li>
+                <li><Link to="/compare" className="hover:text-primary transition-colors">Compare</Link></li>
               </ul>
             </div>
-            <div>
-              <h4 className="font-semibold mb-4">For Vendors</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link to="/auth?vendor=true" className="hover:text-primary">Sign Up</Link></li>
-                <li><Link to="/vendor" className="hover:text-primary">Dashboard</Link></li>
+            <div className="space-y-3">
+              <h4 className="font-bold text-lg">For Vendors</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><Link to="/auth?vendor=true" className="hover:text-primary transition-colors">Sign Up</Link></li>
+                <li><Link to="/vendor" className="hover:text-primary transition-colors">Dashboard</Link></li>
               </ul>
             </div>
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">Help Center</a></li>
-                <li><a href="#" className="hover:text-primary">Contact Us</a></li>
+            <div className="space-y-3">
+              <h4 className="font-bold text-lg">Support</h4>
+              <ul className="space-y-2 text-muted-foreground">
+                <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors">Contact Us</a></li>
               </ul>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
+          <div className="pt-8 border-t border-border/50 text-center text-muted-foreground">
             © 2025 TechPrice. All rights reserved.
           </div>
         </div>
