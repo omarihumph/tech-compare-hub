@@ -49,7 +49,7 @@ const VendorDashboard = () => {
     name: "",
     brand: "",
     model: "",
-    category: "laptop",
+    category: "laptops",
     price: "",
     description: "",
     specs: {} as Record<string, string>,
@@ -458,11 +458,18 @@ const VendorDashboard = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="laptop">Laptop</SelectItem>
-                        <SelectItem value="desktop">Desktop</SelectItem>
-                        <SelectItem value="smartphone">Smartphone</SelectItem>
-                        <SelectItem value="tablet">Tablet</SelectItem>
-                        <SelectItem value="accessory">Accessory</SelectItem>
+                        <SelectItem value="laptops">Laptops</SelectItem>
+                        <SelectItem value="desktops">Desktops</SelectItem>
+                        <SelectItem value="monitors">Monitors</SelectItem>
+                        <SelectItem value="smartphones">Smartphones</SelectItem>
+                        <SelectItem value="tablets">Tablets</SelectItem>
+                        <SelectItem value="accessories">Accessories</SelectItem>
+                        <SelectItem value="components">Components</SelectItem>
+                        <SelectItem value="networking">Networking</SelectItem>
+                        <SelectItem value="storage">Storage</SelectItem>
+                        <SelectItem value="audio">Audio</SelectItem>
+                        <SelectItem value="gaming">Gaming</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
