@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, ShoppingCart, Star, Shield, Zap, X, Menu } from "lucide-react";
@@ -14,6 +14,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useComparison } from "@/contexts/ComparisonContext";
 import { toast } from "sonner";
+
+const TechShowcase3D = lazy(() => import("@/components/TechShowcase3D"));
 
 interface Product {
   id: string;
@@ -175,13 +177,17 @@ const Home = () => {
               </div>
             </div>
             
-            {/* Abstract shape decoration */}
+            {/* 3D Tech Showcase */}
             <div className="hidden lg:flex items-center justify-center relative">
-              <div className="relative w-full h-[500px]">
-                <div className="absolute inset-0 bg-gradient-primary rounded-full blur-3xl opacity-30 animate-glow-pulse" />
-                <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-secondary rounded-full blur-2xl opacity-40 animate-float" />
-                <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-accent rounded-full blur-2xl opacity-30 animate-float" style={{ animationDelay: "2s" }} />
-              </div>
+              <Suspense fallback={
+                <div className="relative w-full h-[500px]">
+                  <div className="absolute inset-0 bg-gradient-primary rounded-full blur-3xl opacity-30 animate-glow-pulse" />
+                  <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-secondary rounded-full blur-2xl opacity-40 animate-float" />
+                  <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-gradient-accent rounded-full blur-2xl opacity-30 animate-float" style={{ animationDelay: "2s" }} />
+                </div>
+              }>
+                <TechShowcase3D />
+              </Suspense>
             </div>
           </div>
         </div>
