@@ -116,22 +116,32 @@ const VendorDashboard = () => {
   const loadVendorData = async (userId: string) => {
     try {
       // Load vendor profile
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from("vendor_profiles")
         .select("*")
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
 
+      if (profileError) {
+        console.error("Error loading vendor profile:", profileError);
+      }
+
+      console.log("Loaded vendor profile:", profile);
       setVendorProfile(profile);
 
       if (profile) {
         // Load vendor's products
-        const { data: productsData } = await supabase
+        const { data: productsData, error: productsError } = await supabase
           .from("products")
           .select("*")
           .eq("vendor_id", profile.id)
           .order("created_at", { ascending: false });
 
+        if (productsError) {
+          console.error("Error loading products:", productsError);
+        }
+
+        console.log("Loaded products:", productsData);
         setProducts(productsData || []);
       }
     } catch (error) {
@@ -175,7 +185,14 @@ const VendorDashboard = () => {
   };
 
   const handleSubmitProduct = async () => {
-    if (!vendorProfile) return;
+    if (!vendorProfile) {
+      toast({
+        title: "Error",
+        description: "No vendor profile found",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       setUploading(true);
@@ -198,14 +215,37 @@ const VendorDashboard = () => {
         status: "pending" as any,
       };
 
+      console.log("Submitting product data:", productData);
+
       if (editingProduct) {
-        await supabase
+        const { error } = await supabase
           .from("products")
           .update(productData)
           .eq("id", editingProduct.id);
+        
+        if (error) {
+          console.error("Update error:", error);
+          toast({
+            title: "Update Failed",
+            description: error.message || "Failed to update product",
+            variant: "destructive",
+          });
+          return;
+        }
         toast({ title: "Product updated successfully" });
       } else {
-        await supabase.from("products").insert([productData]);
+        const { data, error } = await supabase.from("products").insert([productData]).select();
+        
+        if (error) {
+          console.error("Insert error:", error);
+          toast({
+            title: "Insert Failed",
+            description: error.message || "Failed to add product",
+            variant: "destructive",
+          });
+          return;
+        }
+        console.log("Product inserted:", data);
         toast({ title: "Product added successfully" });
       }
 
@@ -213,11 +253,11 @@ const VendorDashboard = () => {
       resetForm();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) await loadVendorData(user.id);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving product:", error);
       toast({
         title: "Error",
-        description: "Failed to save product",
+        description: error?.message || "Failed to save product",
         variant: "destructive",
       });
     } finally {
@@ -229,15 +269,26 @@ const VendorDashboard = () => {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      await supabase.from("products").delete().eq("id", productId);
+      const { error } = await supabase.from("products").delete().eq("id", productId);
+      
+      if (error) {
+        console.error("Delete error:", error);
+        toast({
+          title: "Delete Failed",
+          description: error.message || "Failed to delete product",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       toast({ title: "Product deleted successfully" });
       const { data: { user } } = await supabase.auth.getUser();
       if (user) await loadVendorData(user.id);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting product:", error);
       toast({
         title: "Error",
-        description: "Failed to delete product",
+        description: error?.message || "Failed to delete product",
         variant: "destructive",
       });
     }
