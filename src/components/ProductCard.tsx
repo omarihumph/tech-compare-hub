@@ -58,7 +58,7 @@ export const ProductCard = ({
         )}
         <h3 className="font-semibold text-lg mb-2 line-clamp-2">{name}</h3>
         <p className="text-2xl font-bold text-primary">
-          ${price.toFixed(2)}
+          KES {price.toLocaleString()}
         </p>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex gap-2">

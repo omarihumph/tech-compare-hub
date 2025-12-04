@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Browse from "./pages/Browse";
 import Compare from "./pages/Compare";
+import ProductDetail from "./pages/ProductDetail";
 import VendorDashboard from "./pages/VendorDashboard";
 import VendorOnboard from "./pages/VendorOnboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/browse" element={<Browse />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/vendor/onboard" element={<VendorOnboard />} />
             <Route 
