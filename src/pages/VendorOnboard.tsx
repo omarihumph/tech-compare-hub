@@ -17,6 +17,9 @@ const VendorOnboard = () => {
   const [user, setUser] = useState<any>(null);
   const [companyName, setCompanyName] = useState("");
   const [description, setDescription] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [address, setAddress] = useState("");
+  const [website, setWebsite] = useState("");
 
   useEffect(() => {
     checkAuthAndVendorStatus();
@@ -107,10 +110,10 @@ const VendorOnboard = () => {
       return;
     }
 
-    if (!companyName.trim()) {
+    if (!companyName.trim() || !whatsapp.trim() || !address.trim()) {
       toast({
-        title: "Required Field",
-        description: "Please enter your company name",
+        title: "Required Fields",
+        description: "Please fill in company name, WhatsApp number, and location",
         variant: "destructive",
       });
       return;
@@ -139,6 +142,9 @@ const VendorOnboard = () => {
           user_id: user.id,
           company_name: companyName.trim(),
           description: description.trim() || null,
+          whatsapp: whatsapp.trim(),
+          address: address.trim(),
+          website: website.trim() || null,
           is_approved: false,
         });
 
@@ -230,6 +236,48 @@ const VendorOnboard = () => {
                 </p>
               </div>
 
+              <div>
+                <Label htmlFor="whatsapp">
+                  WhatsApp Number <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="whatsapp"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  placeholder="+254712345678"
+                  required
+                  disabled={submitting}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="address">
+                  Business Location <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="e.g., Westlands, Nairobi, Kenya"
+                  required
+                  disabled={submitting}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="website">Website (Optional)</Label>
+                <Input
+                  id="website"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="https://yourwebsite.com"
+                  disabled={submitting}
+                  className="mt-2"
+                />
+              </div>
+
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h3 className="font-semibold mb-2">What happens next?</h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
@@ -254,7 +302,7 @@ const VendorOnboard = () => {
 
               <Button
                 type="submit"
-                disabled={submitting || !companyName.trim()}
+                disabled={submitting || !companyName.trim() || !whatsapp.trim() || !address.trim()}
                 className="w-full"
                 size="lg"
               >
