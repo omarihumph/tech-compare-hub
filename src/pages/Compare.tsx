@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, ArrowLeft, X, Mail, Phone, MessageCircle, ExternalLink } from "lucide-react";
+import { AIRecommendation } from "@/components/AIRecommendation";
 import { toast } from "sonner";
 
 interface Product {
@@ -39,6 +40,7 @@ const Compare = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [vendorProfiles, setVendorProfiles] = useState<Record<string, VendorProfile>>({});
   const [loading, setLoading] = useState(true);
+  const [highlightedProductId, setHighlightedProductId] = useState<string | null>(null);
 
   useEffect(() => {
     if (productIds.length === 0) {
@@ -163,6 +165,16 @@ const Compare = () => {
           </p>
         </div>
 
+        {/* AI Recommendation Section */}
+        {products.length >= 2 && (
+          <div className="mb-8">
+            <AIRecommendation 
+              products={products} 
+              onHighlight={(id) => setHighlightedProductId(id)}
+            />
+          </div>
+        )}
+
         {/* Desktop View - Table */}
         <div className="hidden lg:block overflow-x-auto">
           <div className="min-w-full">
@@ -172,7 +184,19 @@ const Compare = () => {
                 Features
               </div>
               {products.map((product) => (
-                <Card key={product.id} className="relative p-4">
+                <Card 
+                  key={product.id} 
+                  className={`relative p-4 transition-all duration-300 ${
+                    highlightedProductId === product.id 
+                      ? "ring-2 ring-primary shadow-lg shadow-primary/20" 
+                      : ""
+                  }`}
+                >
+                  {highlightedProductId === product.id && (
+                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">
+                      AI Recommended
+                    </Badge>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
