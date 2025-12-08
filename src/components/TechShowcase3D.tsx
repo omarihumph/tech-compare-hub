@@ -8,24 +8,59 @@ import { useNavigate } from "react-router-dom";
 const productImages = [
   {
     src: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&q=80",
-    alt: "iPhone 17 Pro",
+    alt: "iPhone 15 Pro Max",
     category: "Smartphones",
-    description: "The most advanced iPhone ever with A19 Pro chip, titanium design, and revolutionary camera system.",
-    price: "KES 245,000"
+    description: "Latest iPhone with titanium design and A17 Pro chip",
+    price: "KES 189,999"
   },
   {
     src: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600&q=80",
-    alt: "Samsung Galaxy Z Fold",
+    alt: "Samsung Galaxy S24 Ultra",
     category: "Smartphones",
-    description: "Unfold your world with the ultimate foldable smartphone featuring a 7.6-inch immersive display.",
-    price: "KES 285,000"
+    description: "Premium Android with S Pen and AI features",
+    price: "KES 174,999"
   },
   {
-    src: "https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?w=600&q=80",
-    alt: "Samsung Galaxy Z Flip",
-    category: "Smartphones",
-    description: "Compact and stylish flip phone with Flex Mode and stunning camera capabilities.",
-    price: "KES 165,000"
+    src: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&q=80",
+    alt: "MacBook Pro 14\"",
+    category: "Laptops",
+    description: "Powerful laptop with M3 Pro chip, 18GB RAM, 512GB SSD",
+    price: "KES 249,999"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&q=80",
+    alt: "Dell XPS 15",
+    category: "Laptops",
+    description: "Premium ultrabook with Intel i7, 16GB RAM, stunning OLED display",
+    price: "KES 189,999"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600&q=80",
+    alt: "PlayStation 5",
+    category: "Gaming",
+    description: "Next-gen gaming console with 1TB SSD",
+    price: "KES 74,999"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&q=80",
+    alt: "iPad Pro 12.9\"",
+    category: "Tablets",
+    description: "Most powerful iPad with M2 chip and Liquid Retina XDR",
+    price: "KES 149,999"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&q=80",
+    alt: "Sony WH-1000XM5",
+    category: "Audio",
+    description: "Industry-leading noise cancelling headphones",
+    price: "KES 44,999"
+  },
+  {
+    src: "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=600&q=80",
+    alt: "ASUS ROG Strix G16",
+    category: "Gaming",
+    description: "Ultimate gaming laptop with RTX 4070 and 165Hz display",
+    price: "KES 219,999"
   }
 ];
 
