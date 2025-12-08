@@ -7,74 +7,25 @@ import { useNavigate } from "react-router-dom";
 
 const productImages = [
   {
-    src: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&q=80",
-    alt: "MacBook Pro",
-    category: "Laptops",
-    description: "Powerful laptop with M-series chip for professionals and creatives.",
+    src: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&q=80",
+    alt: "iPhone 17 Pro",
+    category: "Smartphones",
+    description: "The most advanced iPhone ever with A19 Pro chip, titanium design, and revolutionary camera system.",
     price: "KES 245,000"
   },
   {
-    src: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=600&q=80",
-    alt: "iPhone",
+    src: "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600&q=80",
+    alt: "Samsung Galaxy Z Fold",
     category: "Smartphones",
-    description: "Latest smartphone with advanced camera system and A-series chip.",
-    price: "KES 185,000"
+    description: "Unfold your world with the ultimate foldable smartphone featuring a 7.6-inch immersive display.",
+    price: "KES 285,000"
   },
   {
-    src: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=600&q=80",
-    alt: "Smart Watch",
-    category: "Accessories",
-    description: "Track your fitness, health metrics, and stay connected on the go.",
-    price: "KES 65,000"
-  },
-  {
-    src: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600&q=80",
-    alt: "PlayStation 5",
-    category: "Gaming",
-    description: "Next-gen gaming console with ultra-fast SSD and ray tracing.",
-    price: "KES 95,000"
-  },
-  {
-    src: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=600&q=80",
-    alt: "iMac",
-    category: "Desktops",
-    description: "All-in-one desktop with stunning Retina display and powerful performance.",
-    price: "KES 295,000"
-  },
-  {
-    src: "https://images.unsplash.com/photo-1595225476474-87563907a212?w=600&q=80",
-    alt: "Mechanical Keyboard",
-    category: "Accessories",
-    description: "Premium mechanical keyboard with RGB lighting and tactile switches.",
-    price: "KES 18,500"
-  },
-  {
-    src: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80",
-    alt: "Headphones",
-    category: "Audio",
-    description: "Premium over-ear headphones with active noise cancellation.",
-    price: "KES 55,000"
-  },
-  {
-    src: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&q=80",
-    alt: "iPad",
-    category: "Tablets",
-    description: "Versatile tablet for creativity, productivity, and entertainment.",
-    price: "KES 125,000"
-  },
-  {
-    src: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=600&q=80",
-    alt: "Xbox Controller",
-    category: "Gaming",
-    description: "Ergonomic wireless controller for seamless gaming experiences.",
-    price: "KES 12,500"
-  },
-  {
-    src: "https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?w=600&q=80",
-    alt: "Gaming Mouse",
-    category: "Accessories",
-    description: "High-precision gaming mouse with customizable DPI and RGB.",
-    price: "KES 8,500"
+    src: "https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?w=600&q=80",
+    alt: "Samsung Galaxy Z Flip",
+    category: "Smartphones",
+    description: "Compact and stylish flip phone with Flex Mode and stunning camera capabilities.",
+    price: "KES 165,000"
   }
 ];
 
