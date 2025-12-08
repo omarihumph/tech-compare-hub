@@ -224,7 +224,7 @@ const Compare = () => {
                   )}
                   <h3 className="font-semibold mb-2 line-clamp-2">{product.name}</h3>
                   <p className="text-2xl font-bold text-primary mb-4">
-                    ${product.price.toFixed(2)}
+                    KES {product.price.toLocaleString()}
                   </p>
                 </Card>
               ))}
@@ -401,7 +401,7 @@ const Compare = () => {
               )}
               <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
               <p className="text-3xl font-bold text-primary mb-4">
-                ${product.price.toFixed(2)}
+                KES {product.price.toLocaleString()}
               </p>
 
               <Separator className="my-4" />

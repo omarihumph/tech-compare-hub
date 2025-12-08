@@ -149,10 +149,10 @@ const Browse = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Prices</SelectItem>
-                <SelectItem value="0-500">Under $500</SelectItem>
-                <SelectItem value="500-1000">$500 - $1000</SelectItem>
-                <SelectItem value="1000-2000">$1000 - $2000</SelectItem>
-                <SelectItem value="2000-999999">Over $2000</SelectItem>
+                <SelectItem value="0-50000">Under KES 50,000</SelectItem>
+                <SelectItem value="50000-100000">KES 50,000 - 100,000</SelectItem>
+                <SelectItem value="100000-200000">KES 100,000 - 200,000</SelectItem>
+                <SelectItem value="200000-999999999">Over KES 200,000</SelectItem>
               </SelectContent>
             </Select>
           </div>
