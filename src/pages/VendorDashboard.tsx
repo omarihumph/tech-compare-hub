@@ -474,7 +474,7 @@ const VendorDashboard = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="price">Price (ETB) *</Label>
+                    <Label htmlFor="price">Price (KES) *</Label>
                     <Input
                       id="price"
                       type="number"
@@ -584,7 +584,7 @@ const VendorDashboard = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold text-primary mb-2">
-                  ETB {product.price.toLocaleString()}
+                  KES {product.price.toLocaleString()}
                 </p>
                 {product.brand && (
                   <p className="text-sm text-muted-foreground">
