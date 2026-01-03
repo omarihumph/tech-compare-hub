@@ -1,8 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, ShoppingCart, Star, Shield, Zap, X, Menu } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ArrowRight, ShoppingCart, Star, Shield, Zap, X, Menu, User, LogOut, Store, ChevronDown } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Carousel,
   CarouselContent,
@@ -10,6 +10,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ProductCard } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useComparison } from "@/contexts/ComparisonContext";
@@ -27,11 +36,34 @@ interface Product {
 }
 
 const Home = () => {
+  const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isVendor, setIsVendor] = useState(false);
   const { selectedProducts, toggleProduct, compareProducts } = useComparison();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setIsVendor(false);
+    toast.success("Logged out successfully");
+    navigate("/");
+  };
+
+  const getUserInitials = () => {
+    if (!user) return "U";
+    const name = user.user_metadata?.full_name || user.email || "";
+    if (user.user_metadata?.full_name) {
+      return name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+    }
+    return name.charAt(0).toUpperCase();
+  };
+
+  const getUserDisplayName = () => {
+    if (!user) return "";
+    return user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
+  };
 
   useEffect(() => {
     fetchFeaturedProducts();
@@ -132,17 +164,46 @@ const Home = () => {
           </div>
           <div className="flex items-center gap-3">
             {user ? (
-              <>
-                {isVendor ? (
-                  <Link to="/vendor">
-                    <Button size="sm">Dashboard</Button>
-                  </Link>
-                ) : (
-                  <Link to="/vendor/onboard">
-                    <Button size="sm">Become a Vendor</Button>
-                  </Link>
-                )}
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 px-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="hidden sm:inline-block font-medium max-w-[120px] truncate">
+                      {getUserDisplayName()}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-card border border-border z-50">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{getUserDisplayName()}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {isVendor ? (
+                    <DropdownMenuItem onClick={() => navigate("/vendor")} className="cursor-pointer">
+                      <Store className="mr-2 h-4 w-4" />
+                      Vendor Dashboard
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={() => navigate("/vendor/onboard")} className="cursor-pointer">
+                      <Store className="mr-2 h-4 w-4" />
+                      Become a Vendor
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <>
                 <Link to="/auth">
