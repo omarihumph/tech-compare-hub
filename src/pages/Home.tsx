@@ -35,6 +35,14 @@ interface Product {
   image_url: string | null;
 }
 
+const HERO_PHRASES = [
+  "Smarter Tech Deals",
+  "Compare. Save. Win.",
+  "Your Price Hunter",
+  "Tech Made Simple",
+  "Shop Like a Pro",
+];
+
 const Home = () => {
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -42,6 +50,41 @@ const Home = () => {
   const [user, setUser] = useState<any>(null);
   const [isVendor, setIsVendor] = useState(false);
   const { selectedProducts, toggleProduct, compareProducts } = useComparison();
+  
+  // Typewriter effect state
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [displayedText, setDisplayedText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Typewriter effect
+  useEffect(() => {
+    const currentPhrase = HERO_PHRASES[currentPhraseIndex];
+    const typeSpeed = isDeleting ? 50 : 100;
+    const pauseTime = isDeleting ? 500 : 2000;
+
+    if (!isDeleting && displayedText === currentPhrase) {
+      // Pause before starting to delete
+      const timeout = setTimeout(() => setIsDeleting(true), pauseTime);
+      return () => clearTimeout(timeout);
+    }
+
+    if (isDeleting && displayedText === "") {
+      // Move to next phrase
+      setIsDeleting(false);
+      setCurrentPhraseIndex((prev) => (prev + 1) % HERO_PHRASES.length);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setDisplayedText((prev) =>
+        isDeleting
+          ? prev.slice(0, -1)
+          : currentPhrase.slice(0, prev.length + 1)
+      );
+    }, typeSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [displayedText, isDeleting, currentPhraseIndex]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -232,11 +275,10 @@ const Home = () => {
                 </div>
               </div>
               <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-none">
-                Abstract
-                <br />
                 <span className="bg-gradient-primary bg-clip-text text-transparent">
-                  Tech Shopping
+                  {displayedText}
                 </span>
+                <span className="animate-pulse text-primary">|</span>
               </h1>
               <p className="text-xl text-muted-foreground max-w-xl leading-relaxed">
                 Experience the future of tech product comparison. Find verified vendors, compare specs instantly, and make confident decisions.
