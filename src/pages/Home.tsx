@@ -35,12 +35,12 @@ interface Product {
   image_url: string | null;
 }
 
-const HERO_PHRASES = [
-  "Smarter Tech Deals",
-  "Compare. Save. Win.",
-  "Your Price Hunter",
-  "Tech Made Simple",
-  "Shop Like a Pro",
+const HERO_CONTENT = [
+  { phrase: "Smarter Tech Deals", subtitle: "AI-powered recommendations for the best prices in Kenya" },
+  { phrase: "Compare. Save. Win.", subtitle: "Side-by-side comparisons that help you make the right choice" },
+  { phrase: "Your Price Hunter", subtitle: "Track prices and get notified when deals drop" },
+  { phrase: "Tech Made Simple", subtitle: "From specs to purchase, we simplify every step" },
+  { phrase: "Shop Like a Pro", subtitle: "Join thousands of savvy tech shoppers" },
 ];
 
 const Home = () => {
@@ -55,23 +55,28 @@ const Home = () => {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [subtitleOpacity, setSubtitleOpacity] = useState(1);
 
   // Typewriter effect
   useEffect(() => {
-    const currentPhrase = HERO_PHRASES[currentPhraseIndex];
-    const typeSpeed = isDeleting ? 50 : 100;
-    const pauseTime = isDeleting ? 500 : 2000;
+    const currentPhrase = HERO_CONTENT[currentPhraseIndex].phrase;
+    const typeSpeed = isDeleting ? 40 : 80;
+    const pauseTime = isDeleting ? 300 : 2500;
 
     if (!isDeleting && displayedText === currentPhrase) {
       // Pause before starting to delete
-      const timeout = setTimeout(() => setIsDeleting(true), pauseTime);
+      const timeout = setTimeout(() => {
+        setSubtitleOpacity(0);
+        setTimeout(() => setIsDeleting(true), 300);
+      }, pauseTime);
       return () => clearTimeout(timeout);
     }
 
     if (isDeleting && displayedText === "") {
       // Move to next phrase
       setIsDeleting(false);
-      setCurrentPhraseIndex((prev) => (prev + 1) % HERO_PHRASES.length);
+      setCurrentPhraseIndex((prev) => (prev + 1) % HERO_CONTENT.length);
+      setTimeout(() => setSubtitleOpacity(1), 100);
       return;
     }
 
@@ -274,14 +279,28 @@ const Home = () => {
                   <span className="text-sm font-semibold text-primary">✨ Compare. Decide. Win.</span>
                 </div>
               </div>
-              <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-none">
-                <span className="bg-gradient-primary bg-clip-text text-transparent">
-                  {displayedText}
+              <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-none min-h-[1.2em]">
+                <span className="bg-gradient-primary bg-clip-text text-transparent inline-flex">
+                  {displayedText.split("").map((char, index) => (
+                    <span
+                      key={`${currentPhraseIndex}-${index}`}
+                      className="inline-block animate-fade-in"
+                      style={{
+                        animationDelay: `${index * 30}ms`,
+                        animationFillMode: "both",
+                      }}
+                    >
+                      {char === " " ? "\u00A0" : char}
+                    </span>
+                  ))}
                 </span>
-                <span className="animate-pulse text-primary">|</span>
+                <span className="animate-pulse text-primary ml-1">|</span>
               </h1>
-              <p className="text-xl text-muted-foreground max-w-xl leading-relaxed">
-                Experience the future of tech product comparison. Find verified vendors, compare specs instantly, and make confident decisions.
+              <p 
+                className="text-xl text-muted-foreground max-w-xl leading-relaxed transition-opacity duration-300 min-h-[2em]"
+                style={{ opacity: subtitleOpacity }}
+              >
+                {HERO_CONTENT[currentPhraseIndex].subtitle}
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
                 <Link to="/browse">
