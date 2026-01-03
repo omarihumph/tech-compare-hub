@@ -36,6 +36,20 @@ const Home = () => {
   useEffect(() => {
     fetchFeaturedProducts();
     checkUserStatus();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        setTimeout(() => {
+          checkVendorRole(session.user.id);
+        }, 0);
+      } else {
+        setIsVendor(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const checkUserStatus = async () => {
@@ -43,15 +57,19 @@ const Home = () => {
     setUser(authUser);
 
     if (authUser) {
-      const { data: vendorRole } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", authUser.id)
-        .eq("role", "vendor")
-        .maybeSingle();
-      
-      setIsVendor(!!vendorRole);
+      checkVendorRole(authUser.id);
     }
+  };
+
+  const checkVendorRole = async (userId: string) => {
+    const { data: vendorRole } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "vendor")
+      .maybeSingle();
+    
+    setIsVendor(!!vendorRole);
   };
 
   const fetchFeaturedProducts = async () => {
