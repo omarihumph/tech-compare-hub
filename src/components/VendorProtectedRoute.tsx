@@ -13,6 +13,7 @@ const VendorProtectedRoute = ({ children }: VendorProtectedRouteProps) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isVendor, setIsVendor] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -31,19 +32,46 @@ const VendorProtectedRoute = ({ children }: VendorProtectedRouteProps) => {
 
       setUser(authUser);
 
-      // Check vendor role
-      const { data: vendorRole, error } = await supabase
+      // Check multiple sources for vendor status
+      // 1. Check user_roles table
+      const { data: vendorRole } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", authUser.id)
         .eq("role", "vendor")
         .maybeSingle();
 
-      if (error) {
-        console.error("Error checking vendor role:", error);
-        setIsVendor(false);
-      } else {
-        setIsVendor(!!vendorRole);
+      // 2. Check profiles table
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", authUser.id)
+        .single();
+
+      // 3. Check vendor_profiles table (if they have a vendor profile, they're a vendor)
+      const { data: vendorProfile } = await supabase
+        .from("vendor_profiles")
+        .select("id, is_approved")
+        .eq("user_id", authUser.id)
+        .maybeSingle();
+
+      // User is a vendor if ANY of these conditions are true
+      const hasVendorRole = !!vendorRole;
+      const hasVendorProfile = !!vendorProfile;
+      const profileSaysVendor = profile?.role === "vendor";
+
+      const isVendorUser = hasVendorRole || hasVendorProfile || profileSaysVendor;
+      
+      setIsVendor(isVendorUser);
+      setIsApproved(vendorProfile?.is_approved ?? false);
+
+      // If user has vendor profile but no vendor role, try to insert it
+      if (vendorProfile && !vendorRole) {
+        await supabase
+          .from("user_roles")
+          .insert({ user_id: authUser.id, role: "vendor" })
+          .select()
+          .maybeSingle();
       }
     } catch (error) {
       console.error("Error in vendor access check:", error);

@@ -14,6 +14,7 @@ import VendorOnboard from "./pages/VendorOnboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import VendorProtectedRoute from "./components/VendorProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -27,9 +28,21 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/browse" element={<Browse />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/compare" element={<Compare />} />
+            <Route path="/browse" element={
+              <ProtectedRoute>
+                <Browse />
+              </ProtectedRoute>
+            } />
+            <Route path="/product/:id" element={
+              <ProtectedRoute>
+                <ProductDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/compare" element={
+              <ProtectedRoute>
+                <Compare />
+              </ProtectedRoute>
+            } />
             <Route path="/vendor/onboard" element={<VendorOnboard />} />
             <Route 
               path="/vendor" 
