@@ -36,11 +36,11 @@ interface Product {
 }
 
 const HERO_CONTENT = [
-  { phrase: "Smarter Tech Deals", subtitle: "AI-powered recommendations for the best prices in Kenya" },
-  { phrase: "Compare. Save. Win.", subtitle: "Side-by-side comparisons that help you make the right choice" },
-  { phrase: "Your Price Hunter", subtitle: "Track prices and get notified when deals drop" },
-  { phrase: "Tech Made Simple", subtitle: "From specs to purchase, we simplify every step" },
-  { phrase: "Shop Like a Pro", subtitle: "Join thousands of savvy tech shoppers" },
+  { phrase: "Smarter Tech Deals", subtitle: "AI-powered recommendations for the best prices in Kenya", gradient: "var(--gradient-typewriter-1)" },
+  { phrase: "Compare. Save. Win.", subtitle: "Side-by-side comparisons that help you make the right choice", gradient: "var(--gradient-typewriter-2)" },
+  { phrase: "Your Price Hunter", subtitle: "Track prices and get notified when deals drop", gradient: "var(--gradient-typewriter-3)" },
+  { phrase: "Tech Made Simple", subtitle: "From specs to purchase, we simplify every step", gradient: "var(--gradient-typewriter-4)" },
+  { phrase: "Shop Like a Pro", subtitle: "Join thousands of savvy tech shoppers", gradient: "var(--gradient-typewriter-5)" },
 ];
 
 const Home = () => {
@@ -280,21 +280,30 @@ const Home = () => {
                 </div>
               </div>
               <h1 className="text-6xl md:text-8xl font-bold tracking-tighter leading-none min-h-[1.2em]">
-                <span className="bg-gradient-primary bg-clip-text text-transparent inline-flex">
+                <span 
+                  className="bg-clip-text text-transparent inline-flex transition-all duration-700"
+                  style={{ 
+                    backgroundImage: HERO_CONTENT[currentPhraseIndex].gradient,
+                  }}
+                >
                   {displayedText.split("").map((char, index) => (
                     <span
-                      key={`${currentPhraseIndex}-${index}`}
-                      className="inline-block animate-fade-in"
+                      key={`${currentPhraseIndex}-${index}-${char}`}
+                      className="inline-block animate-letter-fade"
                       style={{
-                        animationDelay: `${index * 30}ms`,
-                        animationFillMode: "both",
+                        animationDelay: `${index * 35}ms`,
                       }}
                     >
                       {char === " " ? "\u00A0" : char}
                     </span>
                   ))}
                 </span>
-                <span className="animate-pulse text-primary ml-1">|</span>
+                <span 
+                  className="animate-pulse ml-1"
+                  style={{ 
+                    color: `hsl(var(--primary))`,
+                  }}
+                >|</span>
               </h1>
               <p 
                 className="text-xl text-muted-foreground max-w-xl leading-relaxed transition-opacity duration-300 min-h-[2em]"

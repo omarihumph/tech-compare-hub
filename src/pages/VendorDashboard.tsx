@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit, Trash2, Upload, LogOut, Clock, AlertCircle } from "lucide-react";
+import { Loader2, Plus, Edit, Trash2, Upload, LogOut, Clock, AlertCircle, ArrowLeft, Home } from "lucide-react";
 
 interface VendorProfile {
   id: string;
@@ -381,9 +381,12 @@ const VendorDashboard = () => {
             <p className="text-muted-foreground mt-2">{vendorProfile.company_name}</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={() => navigate("/")} variant="outline">
-              Home
-            </Button>
+            <Link to="/">
+              <Button variant="outline" className="gap-2">
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            </Link>
             <Button onClick={handleLogout} variant="outline">
               <LogOut className="h-4 w-4 mr-2" /> Logout
             </Button>
