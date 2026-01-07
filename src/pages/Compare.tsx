@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, ArrowLeft, X, Mail, Phone, MessageCircle, ExternalLink } from "lucide-react";
+import { X, Mail, Phone, MessageCircle, ExternalLink } from "lucide-react";
 import { AIRecommendation } from "@/components/AIRecommendation";
 import { toast } from "sonner";
+import { NavBar } from "@/components/NavBar";
 
 interface Product {
   id: string;
@@ -141,21 +142,7 @@ const Compare = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/browse" className="flex items-center gap-2">
-            <ArrowLeft className="h-5 w-5" />
-            <ShoppingCart className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              TechPrice
-            </span>
-          </Link>
-          <Button variant="outline" onClick={() => navigate("/browse")}>
-            Browse More Products
-          </Button>
-        </div>
-      </nav>
+      <NavBar showBackButton />
 
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
