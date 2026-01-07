@@ -12,6 +12,7 @@ import ProductDetail from "./pages/ProductDetail";
 import VendorDashboard from "./pages/VendorDashboard";
 import VendorOnboard from "./pages/VendorOnboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import VendorProtectedRoute from "./components/VendorProtectedRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -44,6 +45,11 @@ const App = () => (
                 <Compare />
               </ProtectedRoute>
             } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
             <Route path="/vendor/onboard" element={<VendorOnboard />} />
             <Route 
               path="/vendor" 
@@ -53,6 +59,11 @@ const App = () => (
                 </VendorProtectedRoute>
               } 
             />
+            <Route path="/vendor/dashboard" element={
+              <VendorProtectedRoute>
+                <VendorDashboard />
+              </VendorProtectedRoute>
+            } />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
@@ -65,3 +76,4 @@ const App = () => (
 );
 
 export default App;
+
