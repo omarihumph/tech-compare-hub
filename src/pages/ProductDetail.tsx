@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +17,7 @@ import {
   Loader2,
   ExternalLink
 } from "lucide-react";
+import { NavBar } from "@/components/NavBar";
 
 interface Product {
   id: string;
@@ -137,22 +138,7 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-bold text-primary">
-            TechPrice
-          </Link>
-          <nav className="flex items-center gap-4">
-            <Link to="/browse">
-              <Button variant="ghost">Browse</Button>
-            </Link>
-            <Link to="/auth">
-              <Button variant="outline">Sign In</Button>
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <NavBar />
 
       <main className="container mx-auto px-4 py-8">
         {/* Back Button */}
