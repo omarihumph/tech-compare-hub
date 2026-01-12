@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      product_catalog: {
+        Row: {
+          brand: string | null
+          category: Database["public"]["Enums"]["product_category"]
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          model: string | null
+          name: string
+          specs: Json | null
+        }
+        Insert: {
+          brand?: string | null
+          category: Database["public"]["Enums"]["product_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          model?: string | null
+          name: string
+          specs?: Json | null
+        }
+        Update: {
+          brand?: string | null
+          category?: Database["public"]["Enums"]["product_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          model?: string | null
+          name?: string
+          specs?: Json | null
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string
@@ -49,6 +85,7 @@ export type Database = {
       products: {
         Row: {
           brand: string | null
+          catalog_id: string | null
           category: Database["public"]["Enums"]["product_category"]
           created_at: string
           description: string | null
@@ -64,6 +101,7 @@ export type Database = {
         }
         Insert: {
           brand?: string | null
+          catalog_id?: string | null
           category: Database["public"]["Enums"]["product_category"]
           created_at?: string
           description?: string | null
@@ -79,6 +117,7 @@ export type Database = {
         }
         Update: {
           brand?: string | null
+          catalog_id?: string | null
           category?: Database["public"]["Enums"]["product_category"]
           created_at?: string
           description?: string | null
@@ -93,6 +132,13 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "products_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "product_catalog"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_vendor_id_fkey"
             columns: ["vendor_id"]
