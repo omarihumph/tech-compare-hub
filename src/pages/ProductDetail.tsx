@@ -15,60 +15,64 @@ import {
   Package, 
   Building2,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Store,
+  TrendingDown,
+  TrendingUp
 } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
 
-interface Product {
+interface CatalogProduct {
   id: string;
   name: string;
   brand: string | null;
   model: string | null;
   category: string;
-  price: number;
   description: string | null;
   image_url: string | null;
   specs: unknown;
-  vendor_id: string;
 }
 
-interface Vendor {
+interface VendorListing {
   id: string;
-  company_name: string;
-  description: string | null;
-  whatsapp: string | null;
-  address: string | null;
-  website: string | null;
-  logo_url: string | null;
+  price: number;
+  vendor_profiles: {
+    id: string;
+    company_name: string;
+    description: string | null;
+    whatsapp: string | null;
+    address: string | null;
+    website: string | null;
+    logo_url: string | null;
+  };
 }
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [vendor, setVendor] = useState<Vendor | null>(null);
+  const [product, setProduct] = useState<CatalogProduct | null>(null);
+  const [listings, setListings] = useState<VendorListing[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (id) {
-      fetchProductAndVendor();
+      fetchProductAndListings();
     }
   }, [id]);
 
-  const fetchProductAndVendor = async () => {
+  const fetchProductAndListings = async () => {
     try {
-      // Fetch product
-      const { data: productData, error: productError } = await supabase
-        .from("products")
+      // Fetch product from catalog
+      const { data: catalogData, error: catalogError } = await supabase
+        .from("product_catalog")
         .select("*")
         .eq("id", id)
-        .eq("status", "approved")
         .maybeSingle();
 
-      if (productError) throw productError;
+      if (catalogError) throw catalogError;
 
-      if (!productData) {
+      if (!catalogData) {
         toast({
           title: "Product not found",
           description: "This product may have been removed or is not available.",
@@ -78,17 +82,30 @@ const ProductDetail = () => {
         return;
       }
 
-      setProduct(productData);
+      setProduct(catalogData);
 
-      // Fetch vendor
-      const { data: vendorData, error: vendorError } = await supabase
-        .from("vendor_profiles")
-        .select("*")
-        .eq("id", productData.vendor_id)
-        .maybeSingle();
+      // Fetch all vendor listings for this product
+      const { data: listingsData, error: listingsError } = await supabase
+        .from("products")
+        .select(`
+          id,
+          price,
+          vendor_profiles (
+            id,
+            company_name,
+            description,
+            whatsapp,
+            address,
+            website,
+            logo_url
+          )
+        `)
+        .eq("catalog_id", id)
+        .eq("status", "approved")
+        .order("price", { ascending: true });
 
-      if (vendorError) throw vendorError;
-      setVendor(vendorData);
+      if (listingsError) throw listingsError;
+      setListings(listingsData || []);
 
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -102,7 +119,7 @@ const ProductDetail = () => {
     }
   };
 
-  const handleWhatsAppClick = () => {
+  const handleWhatsAppClick = (vendor: VendorListing['vendor_profiles']) => {
     if (vendor?.whatsapp) {
       const phoneNumber = vendor.whatsapp.replace(/[^0-9]/g, "");
       const message = encodeURIComponent(
@@ -135,6 +152,10 @@ const ProductDetail = () => {
   const specs = product.specs && typeof product.specs === 'object' && !Array.isArray(product.specs) 
     ? (product.specs as Record<string, string>) 
     : null;
+
+  const lowestPrice = listings.length > 0 ? listings[0].price : 0;
+  const highestPrice = listings.length > 0 ? listings[listings.length - 1].price : 0;
+  const savings = highestPrice - lowestPrice;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
@@ -183,9 +204,30 @@ const ProductDetail = () => {
               )}
             </div>
 
-            <div className="text-4xl font-bold text-primary">
-              {formatPrice(product.price)}
-            </div>
+            {/* Price Summary */}
+            {listings.length > 0 && (
+              <Card className="bg-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Store className="h-5 w-5 text-primary" />
+                      <span className="font-medium">{listings.length} vendor{listings.length > 1 ? 's' : ''} selling</span>
+                    </div>
+                    {savings > 0 && (
+                      <Badge variant="default" className="bg-green-600">
+                        Save up to {formatPrice(savings)}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-primary">{formatPrice(lowestPrice)}</span>
+                    {highestPrice !== lowestPrice && (
+                      <span className="text-muted-foreground">to {formatPrice(highestPrice)}</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {product.description && (
               <p className="text-muted-foreground leading-relaxed">
@@ -211,68 +253,92 @@ const ProductDetail = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
+        </div>
 
-            <Separator />
+        <Separator className="my-8" />
 
-            {/* Vendor Info */}
-            {vendor && (
-              <Card className="border-primary/20 bg-primary/5">
+        {/* Vendor Listings */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Store className="h-6 w-6" />
+            Compare Prices from {listings.length} Vendor{listings.length > 1 ? 's' : ''}
+          </h2>
+
+          <div className="space-y-4">
+            {listings.map((listing, index) => (
+              <Card 
+                key={listing.id} 
+                className={`${index === 0 ? 'border-green-500 bg-green-500/5' : ''}`}
+              >
                 <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Building2 className="h-6 w-6 text-primary" />
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-lg">{listing.vendor_profiles.company_name}</h3>
+                          {index === 0 && (
+                            <Badge variant="default" className="bg-green-600 text-xs">
+                              <TrendingDown className="h-3 w-3 mr-1" />
+                              Lowest Price
+                            </Badge>
+                          )}
+                        </div>
+                        {listing.vendor_profiles.description && (
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                            {listing.vendor_profiles.description}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
+                          {listing.vendor_profiles.address && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              <span>{listing.vendor_profiles.address}</span>
+                            </div>
+                          )}
+                          {listing.vendor_profiles.website && (
+                            <a
+                              href={listing.vendor_profiles.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-primary hover:underline"
+                            >
+                              <Globe className="h-3 w-3" />
+                              <span>Website</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">{vendor.company_name}</h3>
-                      {vendor.description && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {vendor.description}
-                        </p>
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-primary">{formatPrice(listing.price)}</p>
+                        {index > 0 && (
+                          <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
+                            <TrendingUp className="h-3 w-3" />
+                            {formatPrice(listing.price - lowestPrice)} more
+                          </p>
+                        )}
+                      </div>
+                      {listing.vendor_profiles.whatsapp && (
+                        <Button
+                          onClick={() => handleWhatsAppClick(listing.vendor_profiles)}
+                          className="gap-2 bg-green-600 hover:bg-green-700 whitespace-nowrap"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          Contact Vendor
+                        </Button>
                       )}
                     </div>
                   </div>
-
-                  <div className="space-y-3">
-                    {vendor.address && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>{vendor.address}</span>
-                      </div>
-                    )}
-                    {vendor.whatsapp && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span>{vendor.whatsapp}</span>
-                      </div>
-                    )}
-                    {vendor.website && (
-                      <div className="flex items-center gap-3 text-sm">
-                        <Globe className="h-4 w-4 text-muted-foreground" />
-                        <a
-                          href={vendor.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline flex items-center gap-1"
-                        >
-                          {vendor.website}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  {vendor.whatsapp && (
-                    <Button
-                      onClick={handleWhatsAppClick}
-                      className="w-full mt-4 gap-2 bg-green-600 hover:bg-green-700"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                      Contact on WhatsApp
-                    </Button>
-                  )}
                 </CardContent>
               </Card>
-            )}
+            ))}
           </div>
         </div>
       </main>

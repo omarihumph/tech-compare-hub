@@ -10,18 +10,20 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { NavBar } from "@/components/NavBar";
 
-interface Product {
+interface CatalogProduct {
   id: string;
   name: string;
-  price: number;
   brand: string | null;
   category: string;
   image_url: string | null;
+  min_price: number;
+  max_price: number;
+  vendor_count: number;
 }
 
 const Browse = () => {
   const navigate = useNavigate();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -34,10 +36,20 @@ const Browse = () => {
 
   const fetchProducts = async () => {
     try {
+      // Fetch from product_catalog with aggregated pricing from products
       let query = supabase
-        .from("products")
-        .select("*")
-        .eq("status", "approved");
+        .from("product_catalog")
+        .select(`
+          id,
+          name,
+          brand,
+          category,
+          image_url,
+          products!inner (
+            price,
+            status
+          )
+        `);
 
       if (selectedCategory !== "all") {
         query = query.eq("category", selectedCategory as any);
@@ -47,16 +59,32 @@ const Browse = () => {
 
       if (error) throw error;
 
-      let filteredData = data || [];
+      // Process data to get min/max prices and vendor counts
+      const processedProducts: CatalogProduct[] = (data || []).map((item: any) => {
+        const approvedProducts = item.products.filter((p: any) => p.status === 'approved');
+        const prices = approvedProducts.map((p: any) => Number(p.price));
+        
+        return {
+          id: item.id,
+          name: item.name,
+          brand: item.brand,
+          category: item.category,
+          image_url: item.image_url,
+          min_price: Math.min(...prices),
+          max_price: Math.max(...prices),
+          vendor_count: approvedProducts.length,
+        };
+      }).filter((p: CatalogProduct) => p.vendor_count > 0);
 
       // Apply price filter
+      let filteredData = processedProducts;
       if (priceRange !== "all") {
         const [min, max] = priceRange.split("-").map(Number);
         filteredData = filteredData.filter((p) => {
           if (max) {
-            return p.price >= min && p.price <= max;
+            return p.min_price <= max && p.max_price >= min;
           }
-          return p.price >= min;
+          return p.max_price >= min;
         });
       }
 
@@ -182,7 +210,9 @@ const Browse = () => {
                 key={product.id}
                 id={product.id}
                 name={product.name}
-                price={product.price}
+                price={product.min_price}
+                maxPrice={product.max_price}
+                vendorCount={product.vendor_count}
                 brand={product.brand || undefined}
                 category={product.category}
                 imageUrl={product.image_url || undefined}
