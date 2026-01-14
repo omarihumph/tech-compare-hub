@@ -158,9 +158,21 @@ const VendorDashboard = () => {
 
   const handleImageUpload = async (file: File): Promise<string | null> => {
     try {
+      // Get current user for folder-based storage
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Upload Failed",
+          description: "You must be logged in to upload images",
+          variant: "destructive",
+        });
+        return null;
+      }
+
       const fileExt = file.name.split(".").pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      // Use user_id as folder prefix for ownership-based storage policies
+      const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("product-images")
