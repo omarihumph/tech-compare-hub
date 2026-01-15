@@ -1,15 +1,8 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, ShoppingCart, Star, Shield, Zap, X, Menu, User, LogOut, Store, ChevronDown } from "lucide-react";
+import { ArrowRight, ShoppingCart, Star, Shield, Zap, X, Menu, User, LogOut, Store, ChevronDown, ChevronLeft, ChevronRight, ArrowDown } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +12,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ProductCard } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useComparison } from "@/contexts/ComparisonContext";
 import { toast } from "sonner";
@@ -33,6 +25,7 @@ interface Product {
   brand: string | null;
   category: string;
   image_url: string | null;
+  description?: string | null;
 }
 
 const HERO_CONTENT = [
@@ -43,6 +36,17 @@ const HERO_CONTENT = [
   { phrase: "Shop Like a Pro", subtitle: "Join thousands of savvy tech shoppers" },
 ];
 
+const PRODUCT_TAGLINES = [
+  "You can't hide who you are",
+  "Dare to live more",
+  "Beyond the ordinary",
+  "Redefine performance",
+  "Power meets precision",
+  "Unleash your potential",
+  "The future is here",
+  "Excellence redefined",
+];
+
 const Home = () => {
   const navigate = useNavigate();
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -51,11 +55,37 @@ const Home = () => {
   const [isVendor, setIsVendor] = useState(false);
   const { selectedProducts, toggleProduct, compareProducts } = useComparison();
   
+  // Featured product showcase state
+  const [currentProductIndex, setCurrentProductIndex] = useState(0);
+  
   // Typewriter effect state
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [subtitleOpacity, setSubtitleOpacity] = useState(1);
+
+  // Auto-rotate featured products
+  useEffect(() => {
+    if (featuredProducts.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 5));
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [featuredProducts.length]);
+
+  const goToProduct = useCallback((index: number) => {
+    setCurrentProductIndex(index);
+  }, []);
+
+  const nextProduct = useCallback(() => {
+    setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 5));
+  }, [featuredProducts.length]);
+
+  const prevProduct = useCallback(() => {
+    setCurrentProductIndex((prev) => (prev - 1 + Math.min(featuredProducts.length, 5)) % Math.min(featuredProducts.length, 5));
+  }, [featuredProducts.length]);
 
   // Typewriter effect
   useEffect(() => {
@@ -322,54 +352,199 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="relative py-24 px-6">
-        <div className="container mx-auto max-w-7xl">
-          <div className="flex items-end justify-between mb-12">
+      {/* Featured Products - Lamborghini Style Showcase */}
+      <section className="relative bg-gradient-to-b from-background via-background to-card/50">
+        {/* Section Header */}
+        <div className="container mx-auto max-w-7xl px-6 pt-24 pb-8">
+          <div className="flex items-end justify-between">
             <div className="space-y-2">
-              <h2 className="text-5xl font-bold tracking-tight">Featured Products</h2>
-              <p className="text-lg text-muted-foreground">Handpicked deals from verified vendors</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Models</p>
+              <h2 className="text-5xl md:text-6xl font-bold tracking-tight">Featured Products</h2>
             </div>
             <Link to="/browse" className="hidden sm:block">
-              <Button variant="ghost" className="group">
-                View All 
+              <Button variant="ghost" className="group text-sm uppercase tracking-widest">
+                Discover All 
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </div>
-          
-          {loading ? (
-            <div className="text-center py-20">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
-              <p className="text-muted-foreground mt-4">Loading products...</p>
-            </div>
-          ) : featuredProducts.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-muted-foreground text-lg">No products available yet</p>
-            </div>
-          ) : (
-            <Carousel className="w-full">
-              <CarouselContent className="-ml-4">
-                {featuredProducts.map((product) => (
-                  <CarouselItem key={product.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                    <ProductCard
-                      id={product.id}
-                      name={product.name}
-                      price={product.price}
-                      brand={product.brand || undefined}
-                      category={product.category}
-                      imageUrl={product.image_url || undefined}
-                      isSelected={selectedProducts.includes(product.id)}
-                      onToggleCompare={toggleProduct}
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="hidden md:flex -left-6" />
-              <CarouselNext className="hidden md:flex -right-6" />
-            </Carousel>
-          )}
         </div>
+
+        {loading ? (
+          <div className="h-[70vh] flex items-center justify-center">
+            <div className="text-center">
+              <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent" />
+              <p className="text-muted-foreground mt-6 uppercase tracking-widest text-sm">Loading...</p>
+            </div>
+          </div>
+        ) : featuredProducts.length === 0 ? (
+          <div className="h-[50vh] flex items-center justify-center">
+            <p className="text-muted-foreground text-lg">No products available yet</p>
+          </div>
+        ) : (
+          <div className="relative">
+            {/* Main Showcase */}
+            <div className="relative h-[70vh] md:h-[80vh] overflow-hidden">
+              {featuredProducts.slice(0, 5).map((product, index) => (
+                <div
+                  key={product.id}
+                  className={`absolute inset-0 transition-all duration-700 ease-out ${
+                    index === currentProductIndex 
+                      ? "opacity-100 translate-x-0" 
+                      : index < currentProductIndex 
+                        ? "opacity-0 -translate-x-full" 
+                        : "opacity-0 translate-x-full"
+                  }`}
+                >
+                  {/* Background gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent z-10" />
+                  
+                  {/* Product Image */}
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[60%] md:w-[55%] h-[80%] z-0">
+                    {product.image_url ? (
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-contain object-center drop-shadow-2xl"
+                        style={{ filter: "drop-shadow(0 25px 50px rgba(0,0,0,0.5))" }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-muted/20 rounded-lg">
+                        <span className="text-muted-foreground text-lg">No image</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="relative z-20 h-full flex items-center">
+                    <div className="container mx-auto max-w-7xl px-6">
+                      <div className="max-w-xl space-y-6">
+                        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+                          {PRODUCT_TAGLINES[index % PRODUCT_TAGLINES.length]}
+                        </p>
+                        
+                        {product.brand && (
+                          <p className="text-lg text-primary font-medium">{product.brand}</p>
+                        )}
+                        
+                        <h3 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight uppercase leading-none">
+                          {product.name}
+                        </h3>
+                        
+                        <p className="text-3xl md:text-4xl font-bold text-primary">
+                          KES {product.price.toLocaleString()}
+                        </p>
+
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {product.category}
+                        </p>
+
+                        <div className="flex flex-wrap gap-4 pt-4">
+                          <Button 
+                            size="lg" 
+                            className="group uppercase tracking-widest"
+                            onClick={() => navigate(`/product/${product.id}`)}
+                          >
+                            Explore 
+                            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          </Button>
+                          <Button 
+                            size="lg" 
+                            variant="outline"
+                            className="uppercase tracking-widest"
+                            onClick={() => toggleProduct(product.id)}
+                          >
+                            {selectedProducts.includes(product.id) ? "Added ✓" : "Compare"}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Navigation Arrows */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 h-14 w-14 rounded-full bg-card/50 backdrop-blur-sm hover:bg-card/80 border border-border/50"
+                onClick={prevProduct}
+              >
+                <ChevronLeft className="h-8 w-8" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 h-14 w-14 rounded-full bg-card/50 backdrop-blur-sm hover:bg-card/80 border border-border/50"
+                onClick={nextProduct}
+              >
+                <ChevronRight className="h-8 w-8" />
+              </Button>
+
+              {/* Progress Indicators */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+                {featuredProducts.slice(0, 5).map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => goToProduct(index)}
+                    className={`h-1 rounded-full transition-all duration-300 ${
+                      index === currentProductIndex 
+                        ? "w-12 bg-primary" 
+                        : "w-8 bg-muted hover:bg-muted-foreground/50"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Product Thumbnails Bar */}
+            <div className="border-t border-border/30 bg-card/30 backdrop-blur-sm">
+              <div className="container mx-auto max-w-7xl px-6">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-0 divide-x divide-border/30">
+                  {featuredProducts.slice(0, 5).map((product, index) => (
+                    <button
+                      key={product.id}
+                      onClick={() => goToProduct(index)}
+                      className={`group relative py-6 px-4 text-left transition-all duration-300 ${
+                        index === currentProductIndex 
+                          ? "bg-primary/10" 
+                          : "hover:bg-card/50"
+                      }`}
+                    >
+                      <div className={`absolute top-0 left-0 right-0 h-0.5 bg-primary transition-transform duration-300 origin-left ${
+                        index === currentProductIndex ? "scale-x-100" : "scale-x-0"
+                      }`} />
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-muted/30 rounded-lg overflow-hidden flex-shrink-0">
+                          {product.image_url ? (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                              No img
+                            </div>
+                          )}
+                        </div>
+                        <div className="hidden md:block min-w-0">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wide truncate">
+                            {product.brand || product.category}
+                          </p>
+                          <p className="font-semibold truncate">{product.name}</p>
+                          <p className="text-sm text-primary font-medium">
+                            KES {product.price.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Categories Grid */}
