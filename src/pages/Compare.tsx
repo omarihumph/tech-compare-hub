@@ -54,7 +54,8 @@ const Compare = () => {
 
   const fetchProducts = async () => {
     try {
-      const { data, error } = await supabase
+      // First try to fetch from products table (for individual product IDs)
+      let { data, error } = await supabase
         .from("products")
         .select(`
           *,
@@ -67,6 +68,38 @@ const Compare = () => {
         `)
         .in("id", productIds)
         .eq("status", "approved");
+
+      // If no results, try fetching by catalog_id (Browse page uses catalog IDs)
+      if (!error && (!data || data.length === 0)) {
+        const catalogResult = await supabase
+          .from("products")
+          .select(`
+            *,
+            vendor_profiles (
+              company_name,
+              whatsapp,
+              website,
+              user_id
+            )
+          `)
+          .in("catalog_id", productIds)
+          .eq("status", "approved");
+        
+        if (catalogResult.error) throw catalogResult.error;
+        
+        // Get the lowest priced product for each catalog item
+        const catalogProducts = catalogResult.data || [];
+        const bestByCategory = new Map<string, typeof catalogProducts[0]>();
+        
+        catalogProducts.forEach(product => {
+          const existing = bestByCategory.get(product.catalog_id!);
+          if (!existing || product.price < existing.price) {
+            bestByCategory.set(product.catalog_id!, product);
+          }
+        });
+        
+        data = Array.from(bestByCategory.values());
+      }
 
       if (error) throw error;
       setProducts(data || []);
