@@ -69,7 +69,7 @@ const Home = () => {
     if (featuredProducts.length === 0) return;
     
     const interval = setInterval(() => {
-      setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 5));
+      setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 10));
     }, 6000);
 
     return () => clearInterval(interval);
@@ -80,11 +80,11 @@ const Home = () => {
   }, []);
 
   const nextProduct = useCallback(() => {
-    setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 5));
+    setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 10));
   }, [featuredProducts.length]);
 
   const prevProduct = useCallback(() => {
-    setCurrentProductIndex((prev) => (prev - 1 + Math.min(featuredProducts.length, 5)) % Math.min(featuredProducts.length, 5));
+    setCurrentProductIndex((prev) => (prev - 1 + Math.min(featuredProducts.length, 10)) % Math.min(featuredProducts.length, 10));
   }, [featuredProducts.length]);
 
   // Typewriter effect
@@ -184,15 +184,41 @@ const Home = () => {
 
   const fetchFeaturedProducts = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch products from all categories to ensure diversity
+      const categories = ['laptops', 'smartphones', 'tablets', 'monitors', 'accessories'];
+      
+      const { data: allProducts, error } = await supabase
         .from("products")
         .select("id, name, price, brand, category, image_url")
         .eq("status", "approved")
-        .order("created_at", { ascending: false })
-        .limit(8);
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setFeaturedProducts(data || []);
+
+      // Ensure at least one product from each category, then fill up to 10
+      const featured: Product[] = [];
+      const usedIds = new Set<string>();
+
+      // First pass: get one product from each category
+      for (const category of categories) {
+        const categoryProduct = allProducts?.find(
+          (p) => p.category === category && !usedIds.has(p.id)
+        );
+        if (categoryProduct) {
+          featured.push(categoryProduct);
+          usedIds.add(categoryProduct.id);
+        }
+      }
+
+      // Second pass: fill remaining slots up to 10 with any remaining products
+      const remaining = allProducts?.filter((p) => !usedIds.has(p.id)) || [];
+      for (const product of remaining) {
+        if (featured.length >= 10) break;
+        featured.push(product);
+        usedIds.add(product.id);
+      }
+
+      setFeaturedProducts(featured);
     } catch (error) {
       console.error("Error fetching products:", error);
       toast.error("Failed to load featured products");
@@ -385,7 +411,7 @@ const Home = () => {
           <div className="relative">
             {/* Main Showcase */}
             <div className="relative h-[70vh] md:h-[80vh] overflow-hidden">
-              {featuredProducts.slice(0, 5).map((product, index) => (
+              {featuredProducts.slice(0, 10).map((product, index) => (
                 <div
                   key={product.id}
                   className={`absolute inset-0 transition-all duration-700 ease-out ${
@@ -482,15 +508,15 @@ const Home = () => {
               </Button>
 
               {/* Progress Indicators */}
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-                {featuredProducts.slice(0, 5).map((_, index) => (
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-1.5">
+                {featuredProducts.slice(0, 10).map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToProduct(index)}
                     className={`h-1 rounded-full transition-all duration-300 ${
                       index === currentProductIndex 
-                        ? "w-12 bg-primary" 
-                        : "w-8 bg-muted hover:bg-muted-foreground/50"
+                        ? "w-8 bg-primary" 
+                        : "w-4 bg-muted hover:bg-muted-foreground/50"
                     }`}
                   />
                 ))}
@@ -498,14 +524,14 @@ const Home = () => {
             </div>
 
             {/* Product Thumbnails Bar */}
-            <div className="border-t border-border/30 bg-card/30 backdrop-blur-sm">
+            <div className="border-t border-border/30 bg-card/30 backdrop-blur-sm overflow-x-auto">
               <div className="container mx-auto max-w-7xl px-6">
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-0 divide-x divide-border/30">
-                  {featuredProducts.slice(0, 5).map((product, index) => (
+                <div className="flex gap-0 divide-x divide-border/30 min-w-max">
+                  {featuredProducts.slice(0, 10).map((product, index) => (
                     <button
                       key={product.id}
                       onClick={() => goToProduct(index)}
-                      className={`group relative py-6 px-4 text-left transition-all duration-300 ${
+                      className={`group relative py-4 px-3 text-left transition-all duration-300 flex-shrink-0 w-[140px] md:w-[160px] ${
                         index === currentProductIndex 
                           ? "bg-primary/10" 
                           : "hover:bg-card/50"
@@ -514,8 +540,8 @@ const Home = () => {
                       <div className={`absolute top-0 left-0 right-0 h-0.5 bg-primary transition-transform duration-300 origin-left ${
                         index === currentProductIndex ? "scale-x-100" : "scale-x-0"
                       }`} />
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-muted/30 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-12 h-12 bg-muted/30 rounded-lg overflow-hidden flex-shrink-0">
                           {product.image_url ? (
                             <img
                               src={product.image_url}
@@ -528,14 +554,11 @@ const Home = () => {
                             </div>
                           )}
                         </div>
-                        <div className="hidden md:block min-w-0">
-                          <p className="text-xs text-muted-foreground uppercase tracking-wide truncate">
-                            {product.brand || product.category}
+                        <div className="text-center min-w-0 w-full">
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide truncate">
+                            {product.category}
                           </p>
-                          <p className="font-semibold truncate">{product.name}</p>
-                          <p className="text-sm text-primary font-medium">
-                            KES {product.price.toLocaleString()}
-                          </p>
+                          <p className="text-xs font-semibold truncate">{product.name}</p>
                         </div>
                       </div>
                     </button>
