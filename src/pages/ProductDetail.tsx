@@ -21,6 +21,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
+import { PriceAlertButton } from "@/components/PriceAlertButton";
 
 interface CatalogProduct {
   id: string;
@@ -219,12 +220,17 @@ const ProductDetail = () => {
                       </Badge>
                     )}
                   </div>
-                  <div className="flex items-baseline gap-2">
+                  <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-3xl font-bold text-primary">{formatPrice(lowestPrice)}</span>
                     {highestPrice !== lowestPrice && (
                       <span className="text-muted-foreground">to {formatPrice(highestPrice)}</span>
                     )}
                   </div>
+                  <PriceAlertButton
+                    catalogId={product.id}
+                    productName={product.name}
+                    currentLowestPrice={lowestPrice}
+                  />
                 </CardContent>
               </Card>
             )}

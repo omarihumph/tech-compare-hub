@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      price_alerts: {
+        Row: {
+          catalog_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          notified_at: string | null
+          original_price: number
+          target_price: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          catalog_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notified_at?: string | null
+          original_price: number
+          target_price?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          catalog_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          notified_at?: string | null
+          original_price?: number
+          target_price?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_alerts_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "product_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_catalog: {
         Row: {
           brand: string | null
