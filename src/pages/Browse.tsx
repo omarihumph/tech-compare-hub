@@ -35,19 +35,21 @@ const Browse = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>(
     searchParams.get("category") || "all"
   );
+  const [selectedBrand, setSelectedBrand] = useState<string>("all");
   const [priceRange, setPriceRange] = useState<string>("all");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [availableBrands, setAvailableBrands] = useState<string[]>([]);
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedCategory, priceRange]);
+  }, [selectedCategory, priceRange, selectedBrand]);
 
   // Reset to page 1 when filters or search change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, priceRange, searchQuery, sortBy]);
+  }, [selectedCategory, priceRange, searchQuery, sortBy, selectedBrand]);
 
   const fetchProducts = async () => {
     try {
@@ -91,7 +93,18 @@ const Browse = () => {
         };
       }).filter((p: CatalogProduct) => p.vendor_count > 0);
 
+      // Extract unique brands for filter dropdown
+      const brands = [...new Set(processedProducts.map(p => p.brand).filter(Boolean))] as string[];
+      setAvailableBrands(brands.sort());
+
       let filteredData = processedProducts;
+
+      // Filter by brand
+      if (selectedBrand !== "all") {
+        filteredData = filteredData.filter((p) => p.brand === selectedBrand);
+      }
+
+      // Filter by price range
       if (priceRange !== "all") {
         const [min, max] = priceRange.split("-").map(Number);
         filteredData = filteredData.filter((p) => {
@@ -238,7 +251,7 @@ const Browse = () => {
             <SlidersHorizontal className="h-5 w-5" />
             <h2 className="text-lg font-semibold">Filters</h2>
           </div>
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-5 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -259,6 +272,19 @@ const Browse = () => {
                 <SelectItem value="tablets">Tablets</SelectItem>
                 <SelectItem value="monitors">Monitors</SelectItem>
                 <SelectItem value="accessories">Accessories</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={selectedBrand} onValueChange={setSelectedBrand}>
+              <SelectTrigger>
+                <SelectValue placeholder="Brand" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Brands</SelectItem>
+                {availableBrands.map((brand) => (
+                  <SelectItem key={brand} value={brand}>
+                    {brand}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={priceRange} onValueChange={setPriceRange}>
