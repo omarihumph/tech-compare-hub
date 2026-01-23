@@ -59,7 +59,7 @@ const CONTACT_INFO = [
     title: "WhatsApp",
     value: "0700 129 827",
     description: "Chat with us on WhatsApp",
-    href: "https://wa.me/254700129827",
+    href: "https://api.whatsapp.com/send?phone=254700129827&text=Hello%20TechPrice%20Support",
   },
   {
     icon: MapPin,
