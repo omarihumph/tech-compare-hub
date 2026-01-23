@@ -52,24 +52,26 @@ const CONTACT_INFO = [
     title: "Email",
     value: "support@techprice.com",
     description: "We'll respond within 24 hours",
+    href: "mailto:support@techprice.com",
   },
   {
     icon: Phone,
-    title: "Phone",
-    value: "+1 (555) 123-4567",
-    description: "Mon-Fri, 9am-6pm EST",
+    title: "WhatsApp",
+    value: "0700 129 827",
+    description: "Chat with us on WhatsApp",
+    href: "https://wa.me/254700129827",
   },
   {
     icon: MapPin,
     title: "Office",
-    value: "123 Tech Street",
-    description: "San Francisco, CA 94102",
+    value: "Nairobi, Kenya",
+    description: "East Africa",
   },
   {
     icon: Clock,
     title: "Business Hours",
     value: "9:00 AM - 6:00 PM",
-    description: "Monday - Friday (EST)",
+    description: "Monday - Friday (EAT)",
   },
 ];
 
@@ -144,24 +146,34 @@ const Contact = () => {
               <h2 className="text-2xl font-bold text-foreground mb-6">
                 Contact Information
               </h2>
-              {CONTACT_INFO.map((info) => (
-                <Card key={info.title} className="bg-card border-border">
-                  <CardContent className="flex items-start gap-4 p-4">
-                    <div className="p-3 rounded-lg bg-primary/10">
-                      <info.icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">
-                        {info.title}
-                      </h3>
-                      <p className="text-foreground">{info.value}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {info.description}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {CONTACT_INFO.map((info) => {
+                const content = (
+                  <Card key={info.title} className={`bg-card border-border ${info.href ? 'hover:border-primary/50 transition-colors cursor-pointer' : ''}`}>
+                    <CardContent className="flex items-start gap-4 p-4">
+                      <div className="p-3 rounded-lg bg-primary/10">
+                        <info.icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-foreground">
+                          {info.title}
+                        </h3>
+                        <p className="text-foreground">{info.value}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {info.description}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+                
+                return info.href ? (
+                  <a key={info.title} href={info.href} target="_blank" rel="noopener noreferrer">
+                    {content}
+                  </a>
+                ) : (
+                  <div key={info.title}>{content}</div>
+                );
+              })}
             </div>
 
             {/* Contact Form */}

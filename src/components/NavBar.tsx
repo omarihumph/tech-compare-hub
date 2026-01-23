@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, LogOut, Settings, LayoutDashboard, ArrowLeft } from "lucide-react";
+import { ShoppingCart, User, LogOut, Settings, LayoutDashboard, ArrowLeft, HelpCircle, MessageCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -70,9 +70,21 @@ export const NavBar = ({ showBackButton = false, backTo = "/" }: NavBarProps) =>
           </span>
         </Link>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <Link to="/browse">
-            <Button variant="ghost">Browse</Button>
+            <Button variant="ghost" size="sm">Browse</Button>
+          </Link>
+          <Link to="/help">
+            <Button variant="ghost" size="sm" className="gap-1">
+              <HelpCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Help</span>
+            </Button>
+          </Link>
+          <Link to="/contact">
+            <Button variant="ghost" size="sm" className="gap-1">
+              <MessageCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Contact</span>
+            </Button>
           </Link>
           
           {user ? (
