@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Browse from "./pages/Browse";
 import Compare from "./pages/Compare";
 import ProductDetail from "./pages/ProductDetail";
+import MyAlerts from "./pages/MyAlerts";
 import VendorDashboard from "./pages/VendorDashboard";
 import VendorOnboard from "./pages/VendorOnboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -50,6 +51,11 @@ const App = () => (
             <Route path="/settings" element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-alerts" element={
+              <ProtectedRoute>
+                <MyAlerts />
               </ProtectedRoute>
             } />
             <Route path="/vendor/onboard" element={<VendorOnboard />} />
