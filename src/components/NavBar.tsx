@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, User, LogOut, Settings, LayoutDashboard, ArrowLeft, HelpCircle, MessageCircle } from "lucide-react";
+import { ShoppingCart, User, LogOut, Settings, LayoutDashboard, ArrowLeft, HelpCircle, MessageCircle, Bell } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { NotificationBell } from "./NotificationBell";
 
 interface NavBarProps {
   showBackButton?: boolean;
@@ -88,7 +89,9 @@ export const NavBar = ({ showBackButton = false, backTo = "/" }: NavBarProps) =>
           </Link>
           
           {user ? (
-            <DropdownMenu>
+            <>
+              <NotificationBell />
+              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
@@ -106,6 +109,10 @@ export const NavBar = ({ showBackButton = false, backTo = "/" }: NavBarProps) =>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/my-alerts')}>
+                  <Bell className="mr-2 h-4 w-4" />
+                  My Price Alerts
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/settings')}>
                   <Settings className="mr-2 h-4 w-4" />
                   Account Settings
@@ -128,6 +135,7 @@ export const NavBar = ({ showBackButton = false, backTo = "/" }: NavBarProps) =>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </>
           ) : (
             <Link to="/auth">
               <Button>Sign In</Button>
