@@ -184,7 +184,7 @@ Deno.serve(async (req) => {
             `;
 
             const { error: emailError } = await resend.emails.send({
-              from: "TechPrice <alerts@techprice.co.ke>",
+              from: "TechPrice <alerts@techpriceke.com>",
               to: [user.email],
               subject: `🎉 Price dropped on ${catalog?.name || "a product you're watching"}!`,
               html: emailHtml,
