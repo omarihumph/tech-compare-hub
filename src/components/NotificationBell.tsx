@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Bell, TrendingDown, ExternalLink, Package } from "lucide-react";
+import { CheckCheck } from "lucide-react";
 
 interface Notification {
   id: string;
@@ -132,6 +133,24 @@ export const NotificationBell = () => {
     }
   };
 
+  const markAllAsRead = async () => {
+    if (!user || notifications.length === 0) return;
+    
+    try {
+      const alertIds = notifications.map(n => n.id);
+      const { error } = await supabase
+        .from("price_alerts")
+        .update({ notified_at: null })
+        .in("id", alertIds);
+      
+      if (error) throw error;
+      
+      setNotifications([]);
+    } catch (error) {
+      console.error("Error marking notifications as read:", error);
+    }
+  };
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-KE", {
       style: "currency",
@@ -175,11 +194,27 @@ export const NotificationBell = () => {
       <DropdownMenuContent align="end" className="w-80">
         <div className="flex items-center justify-between px-3 py-2">
           <h4 className="font-semibold">Price Drop Alerts</h4>
-          {unreadCount > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              {unreadCount} new
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <>
+                <Badge variant="secondary" className="text-xs">
+                  {unreadCount} new
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    markAllAsRead();
+                  }}
+                >
+                  <CheckCheck className="h-3 w-3 mr-1" />
+                  Clear
+                </Button>
+              </>
+            )}
+          </div>
         </div>
         <DropdownMenuSeparator />
         
