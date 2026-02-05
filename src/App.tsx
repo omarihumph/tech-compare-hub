@@ -20,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import VendorProtectedRoute from "./components/VendorProtectedRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Chatbot from "./components/Chatbot";
+import VendorReviews from "./pages/VendorReviews";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
               </VendorProtectedRoute>
             } />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/vendor/:vendorId/reviews" element={<VendorReviews />} />
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/contact" element={<Contact />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
