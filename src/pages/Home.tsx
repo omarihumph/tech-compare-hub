@@ -69,7 +69,7 @@ const Home = () => {
     if (featuredProducts.length === 0) return;
     
     const interval = setInterval(() => {
-      setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 10));
+      setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 5));
     }, 6000);
 
     return () => clearInterval(interval);
@@ -80,11 +80,11 @@ const Home = () => {
   }, []);
 
   const nextProduct = useCallback(() => {
-    setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 10));
+    setCurrentProductIndex((prev) => (prev + 1) % Math.min(featuredProducts.length, 5));
   }, [featuredProducts.length]);
 
   const prevProduct = useCallback(() => {
-    setCurrentProductIndex((prev) => (prev - 1 + Math.min(featuredProducts.length, 10)) % Math.min(featuredProducts.length, 10));
+    setCurrentProductIndex((prev) => (prev - 1 + Math.min(featuredProducts.length, 5)) % Math.min(featuredProducts.length, 5));
   }, [featuredProducts.length]);
 
   // Typewriter effect
@@ -195,12 +195,13 @@ const Home = () => {
 
       if (error) throw error;
 
-      // Ensure at least one product from each category, then fill up to 10
+      // Ensure at least one product from each category, then fill up to 5
       const featured: Product[] = [];
       const usedIds = new Set<string>();
 
       // First pass: get one product from each category
       for (const category of categories) {
+        if (featured.length >= 5) break;
         const categoryProduct = allProducts?.find(
           (p) => p.category === category && !usedIds.has(p.id)
         );
@@ -210,10 +211,10 @@ const Home = () => {
         }
       }
 
-      // Second pass: fill remaining slots up to 10 with any remaining products
+      // Second pass: fill remaining slots up to 5 with any remaining products
       const remaining = allProducts?.filter((p) => !usedIds.has(p.id)) || [];
       for (const product of remaining) {
-        if (featured.length >= 10) break;
+        if (featured.length >= 5) break;
         featured.push(product);
         usedIds.add(product.id);
       }
@@ -378,21 +379,26 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Products - Lamborghini Style Showcase */}
-      <section className="relative bg-gradient-to-b from-background via-background to-card/50">
-        {/* Section Header */}
-        <div className="container mx-auto max-w-7xl px-6 pt-24 pb-8">
-          <div className="flex items-end justify-between">
-            <div className="space-y-2">
-              <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Models</p>
-              <h2 className="text-5xl md:text-6xl font-bold tracking-tight">Featured Products</h2>
+      {/* Featured Products - Rolex-Inspired Luxury Showcase */}
+      <section className="relative bg-gradient-to-b from-background via-card/20 to-background overflow-hidden">
+        {/* Elegant decorative elements */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-gradient-to-b from-transparent via-primary/30 to-transparent" />
+          <div className="absolute top-32 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-primary/50" />
+        </div>
+        
+        {/* Section Header - Rolex-style refined typography */}
+        <div className="container mx-auto max-w-7xl px-6 pt-32 pb-16 text-center">
+          <div className="space-y-6">
+            <p className="text-xs uppercase tracking-[0.5em] text-primary font-medium">The Collection</p>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-wide">
+              Featured <span className="font-semibold">Products</span>
+            </h2>
+            <div className="flex items-center justify-center gap-4">
+              <div className="w-16 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+              <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Excellence in Tech</span>
+              <div className="w-16 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
             </div>
-            <Link to="/browse" className="hidden sm:block">
-              <Button variant="ghost" className="group text-sm uppercase tracking-widest">
-                Discover All 
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
           </div>
         </div>
 
@@ -409,79 +415,85 @@ const Home = () => {
           </div>
         ) : (
           <div className="relative">
-            {/* Main Showcase */}
-            <div className="relative h-[70vh] md:h-[80vh] overflow-hidden">
-              {featuredProducts.slice(0, 10).map((product, index) => (
+            {/* Main Showcase - Rolex-inspired elegant display */}
+            <div className="relative min-h-[70vh] md:min-h-[75vh] overflow-hidden">
+              {featuredProducts.slice(0, 5).map((product, index) => (
                 <div
                   key={product.id}
-                  className={`absolute inset-0 transition-all duration-700 ease-out ${
+                  className={`absolute inset-0 transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                     index === currentProductIndex 
-                      ? "opacity-100 translate-x-0" 
-                      : index < currentProductIndex 
-                        ? "opacity-0 -translate-x-full" 
-                        : "opacity-0 translate-x-full"
+                      ? "opacity-100 scale-100" 
+                      : "opacity-0 scale-95"
                   }`}
                 >
-                  {/* Background gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent z-10" />
+                  {/* Subtle radial gradient backdrop */}
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
                   
-                  {/* Product Image */}
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[60%] md:w-[55%] h-[80%] z-0">
-                    {product.image_url ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-full object-contain object-center drop-shadow-2xl"
-                        style={{ filter: "drop-shadow(0 25px 50px rgba(0,0,0,0.5))" }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted/20 rounded-lg">
-                        <span className="text-muted-foreground text-lg">No image</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="relative z-20 h-full flex items-center">
-                    <div className="container mx-auto max-w-7xl px-6">
-                      <div className="max-w-xl space-y-6">
-                        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
-                          {PRODUCT_TAGLINES[index % PRODUCT_TAGLINES.length]}
-                        </p>
-                        
+                  {/* Content Grid */}
+                  <div className="container mx-auto max-w-7xl px-6 h-full">
+                    <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center h-full py-12">
+                      
+                      {/* Left: Product Info - Refined Typography */}
+                      <div className="order-2 lg:order-1 space-y-8 text-center lg:text-left">
                         {product.brand && (
-                          <p className="text-lg text-primary font-medium">{product.brand}</p>
+                          <p className="text-xs uppercase tracking-[0.4em] text-primary font-medium">
+                            {product.brand}
+                          </p>
                         )}
                         
-                        <h3 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight uppercase leading-none">
-                          {product.name}
-                        </h3>
+                        <div className="space-y-4">
+                          <h3 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-wide leading-tight">
+                            {product.name}
+                          </h3>
+                          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                            {product.category}
+                          </p>
+                        </div>
                         
-                        <p className="text-3xl md:text-4xl font-bold text-primary">
-                          KES {product.price.toLocaleString()}
-                        </p>
+                        <div className="inline-block">
+                          <div className="w-12 h-px bg-primary/50 mx-auto lg:mx-0 mb-6" />
+                          <p className="text-2xl md:text-3xl font-light tracking-wide">
+                            KES <span className="font-medium">{product.price.toLocaleString()}</span>
+                          </p>
+                        </div>
 
-                        <p className="text-sm text-muted-foreground capitalize">
-                          {product.category}
-                        </p>
-
-                        <div className="flex flex-wrap gap-4 pt-4">
+                        <div className="flex flex-wrap gap-4 justify-center lg:justify-start pt-4">
                           <Button 
                             size="lg" 
-                            className="group uppercase tracking-widest"
+                            className="group px-8 uppercase tracking-[0.2em] text-xs font-medium"
                             onClick={() => navigate(`/product/${product.id}`)}
                           >
-                            Explore 
-                            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                            Discover
+                            <ArrowRight className="ml-3 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                           </Button>
                           <Button 
                             size="lg" 
                             variant="outline"
-                            className="uppercase tracking-widest"
+                            className="px-8 uppercase tracking-[0.2em] text-xs font-medium border-primary/30 hover:border-primary/60 hover:bg-primary/5"
                             onClick={() => toggleProduct(product.id)}
                           >
-                            {selectedProducts.includes(product.id) ? "Added ✓" : "Compare"}
+                            {selectedProducts.includes(product.id) ? "Selected ✓" : "Compare"}
                           </Button>
+                        </div>
+                      </div>
+
+                      {/* Right: Product Image - Clean presentation */}
+                      <div className="order-1 lg:order-2 relative flex items-center justify-center">
+                        <div className="relative w-full max-w-md lg:max-w-lg aspect-square">
+                          {/* Subtle glow behind product */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 rounded-full blur-3xl scale-75" />
+                          
+                          {product.image_url ? (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="relative w-full h-full object-contain object-center drop-shadow-xl transition-transform duration-700 hover:scale-105"
+                            />
+                          ) : (
+                            <div className="relative w-full h-full flex items-center justify-center bg-muted/10 rounded-2xl border border-border/30">
+                              <span className="text-muted-foreground text-sm uppercase tracking-widest">No image</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -489,80 +501,99 @@ const Home = () => {
                 </div>
               ))}
 
-              {/* Navigation Arrows */}
+              {/* Navigation Arrows - Refined minimal style */}
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 h-14 w-14 rounded-full bg-card/50 backdrop-blur-sm hover:bg-card/80 border border-border/50"
+                className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 rounded-full border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
                 onClick={prevProduct}
               >
-                <ChevronLeft className="h-8 w-8" />
+                <ChevronLeft className="h-5 w-5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 h-14 w-14 rounded-full bg-card/50 backdrop-blur-sm hover:bg-card/80 border border-border/50"
+                className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 h-12 w-12 rounded-full border border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
                 onClick={nextProduct}
               >
-                <ChevronRight className="h-8 w-8" />
+                <ChevronRight className="h-5 w-5" />
               </Button>
 
-              {/* Progress Indicators */}
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-1.5">
-                {featuredProducts.slice(0, 10).map((_, index) => (
+              {/* Progress Indicators - Rolex-style elegant dots */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4">
+                {featuredProducts.slice(0, 5).map((_, index) => (
                   <button
                     key={index}
                     onClick={() => goToProduct(index)}
-                    className={`h-1 rounded-full transition-all duration-300 ${
+                    className={`relative transition-all duration-500 ${
                       index === currentProductIndex 
-                        ? "w-8 bg-primary" 
-                        : "w-4 bg-muted hover:bg-muted-foreground/50"
+                        ? "w-3 h-3" 
+                        : "w-2 h-2 opacity-50 hover:opacity-100"
                     }`}
-                  />
+                  >
+                    <span className={`absolute inset-0 rounded-full border transition-all duration-500 ${
+                      index === currentProductIndex 
+                        ? "border-primary bg-primary" 
+                        : "border-muted-foreground/50 hover:border-primary/50"
+                    }`} />
+                    {index === currentProductIndex && (
+                      <span className="absolute inset-0 rounded-full border border-primary animate-ping opacity-30" />
+                    )}
+                  </button>
                 ))}
               </div>
             </div>
 
-            {/* Product Thumbnails Bar */}
-            <div className="border-t border-border/30 bg-card/30 backdrop-blur-sm overflow-x-auto">
-              <div className="container mx-auto max-w-7xl px-6">
-                <div className="flex gap-0 divide-x divide-border/30 min-w-max">
-                  {featuredProducts.slice(0, 10).map((product, index) => (
+            {/* Product Thumbnails Bar - Rolex-inspired minimal elegance */}
+            <div className="border-t border-border/20 bg-gradient-to-b from-card/20 to-transparent">
+              <div className="container mx-auto max-w-4xl px-6 py-8">
+                <div className="flex justify-center gap-6 md:gap-8">
+                  {featuredProducts.slice(0, 5).map((product, index) => (
                     <button
                       key={product.id}
                       onClick={() => goToProduct(index)}
-                      className={`group relative py-4 px-3 text-left transition-all duration-300 flex-shrink-0 w-[140px] md:w-[160px] ${
+                      className={`group relative transition-all duration-500 ${
                         index === currentProductIndex 
-                          ? "bg-primary/10" 
-                          : "hover:bg-card/50"
+                          ? "scale-110" 
+                          : "opacity-60 hover:opacity-100"
                       }`}
                     >
-                      <div className={`absolute top-0 left-0 right-0 h-0.5 bg-primary transition-transform duration-300 origin-left ${
-                        index === currentProductIndex ? "scale-x-100" : "scale-x-0"
-                      }`} />
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-12 h-12 bg-muted/30 rounded-lg overflow-hidden flex-shrink-0">
-                          {product.image_url ? (
-                            <img
-                              src={product.image_url}
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                              No img
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-center min-w-0 w-full">
-                          <p className="text-[10px] text-muted-foreground uppercase tracking-wide truncate">
-                            {product.category}
-                          </p>
-                          <p className="text-xs font-semibold truncate">{product.name}</p>
-                        </div>
+                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 transition-all duration-500 ${
+                        index === currentProductIndex 
+                          ? "border-primary shadow-lg shadow-primary/20" 
+                          : "border-border/30 hover:border-primary/50"
+                      }`}>
+                        {product.image_url ? (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/20 text-muted-foreground text-[8px] uppercase">
+                            No img
+                          </div>
+                        )}
                       </div>
+                      <p className={`mt-2 text-[10px] uppercase tracking-wider text-center transition-all duration-300 ${
+                        index === currentProductIndex 
+                          ? "text-primary font-medium" 
+                          : "text-muted-foreground"
+                      }`}>
+                        {product.category}
+                      </p>
                     </button>
                   ))}
+                </div>
+                
+                {/* Discover All Link */}
+                <div className="flex justify-center mt-8">
+                  <Link to="/browse">
+                    <Button variant="ghost" className="group text-xs uppercase tracking-[0.3em] text-muted-foreground hover:text-primary">
+                      View All Collection
+                      <ArrowRight className="ml-2 h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
