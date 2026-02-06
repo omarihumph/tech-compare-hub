@@ -2,7 +2,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Package, Store, Eye, Plus } from "lucide-react";
+import { Package, Store, Eye, Plus, Star, ExternalLink } from "lucide-react";
 
 interface ProductCardProps {
   id: string;
@@ -14,6 +14,8 @@ interface ProductCardProps {
   category: string;
   imageUrl?: string;
   isSelected?: boolean;
+  vendorRating?: number;
+  vendorWebsite?: string;
   onToggleCompare?: (id: string) => void;
   onViewDetails?: (id: string) => void;
 }
@@ -28,6 +30,8 @@ export const ProductCard = ({
   category,
   imageUrl,
   isSelected = false,
+  vendorRating,
+  vendorWebsite,
   onToggleCompare,
   onViewDetails,
 }: ProductCardProps) => {
@@ -84,11 +88,31 @@ export const ProductCard = ({
           ) : (
             <p className="text-lg font-bold text-primary">{formatPrice(price)}</p>
           )}
-          {hasMultipleVendors && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Store className="h-3 w-3" />
-              <span>{vendorCount} vendors</span>
-            </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            {hasMultipleVendors && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Store className="h-3 w-3" />
+                <span>{vendorCount} vendors</span>
+              </div>
+            )}
+            {vendorRating !== undefined && vendorRating > 0 && (
+              <div className="flex items-center gap-1 text-xs">
+                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                <span className="font-medium">{vendorRating.toFixed(1)}</span>
+              </div>
+            )}
+          </div>
+          {vendorWebsite && (
+            <a
+              href={vendorWebsite}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="h-3 w-3" />
+              <span>Visit Store</span>
+            </a>
           )}
         </div>
       </CardContent>

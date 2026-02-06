@@ -20,6 +20,13 @@ interface CatalogProduct {
   max_price: number;
   vendor_count: number;
   created_at: string;
+  vendor_rating?: number;
+  vendor_website?: string;
+}
+
+interface VendorRating {
+  vendor_id: string;
+  avg_rating: number;
 }
 
 type SortOption = "price_low" | "price_high" | "vendors" | "newest";
@@ -53,6 +60,7 @@ const Browse = () => {
 
   const fetchProducts = async () => {
     try {
+      // Fetch products with vendor info
       let query = supabase
         .from("product_catalog")
         .select(`
@@ -64,7 +72,12 @@ const Browse = () => {
           created_at,
           products!inner (
             price,
-            status
+            status,
+            vendor_id,
+            vendor_profiles!inner (
+              id,
+              website
+            )
           )
         `);
 
@@ -76,10 +89,48 @@ const Browse = () => {
 
       if (error) throw error;
 
+      // Fetch all vendor ratings
+      const { data: reviewsData } = await supabase
+        .from("vendor_reviews")
+        .select("vendor_id, rating");
+
+      // Calculate average ratings per vendor
+      const vendorRatings: Record<string, VendorRating> = {};
+      if (reviewsData) {
+        const ratingsByVendor: Record<string, number[]> = {};
+        reviewsData.forEach((review) => {
+          if (!ratingsByVendor[review.vendor_id]) {
+            ratingsByVendor[review.vendor_id] = [];
+          }
+          ratingsByVendor[review.vendor_id].push(review.rating);
+        });
+        
+        Object.entries(ratingsByVendor).forEach(([vendorId, ratings]) => {
+          vendorRatings[vendorId] = {
+            vendor_id: vendorId,
+            avg_rating: ratings.reduce((a, b) => a + b, 0) / ratings.length,
+          };
+        });
+      }
+
       const processedProducts: CatalogProduct[] = (data || []).map((item: any) => {
         const approvedProducts = item.products.filter((p: any) => p.status === 'approved');
         const prices = approvedProducts.map((p: any) => Number(p.price));
         
+        // Find the lowest price vendor (featured vendor)
+        let featuredVendor = null;
+        let lowestPrice = Infinity;
+        approvedProducts.forEach((p: any) => {
+          if (Number(p.price) < lowestPrice) {
+            lowestPrice = Number(p.price);
+            featuredVendor = p.vendor_profiles;
+          }
+        });
+
+        const vendorId = featuredVendor?.id;
+        const vendorRating = vendorId ? vendorRatings[vendorId]?.avg_rating : undefined;
+        const vendorWebsite = featuredVendor?.website || "https://example-store.com";
+
         return {
           id: item.id,
           name: item.name,
@@ -90,6 +141,8 @@ const Browse = () => {
           max_price: prices.length > 0 ? Math.max(...prices) : 0,
           vendor_count: approvedProducts.length,
           created_at: item.created_at,
+          vendor_rating: vendorRating,
+          vendor_website: vendorWebsite,
         };
       }).filter((p: CatalogProduct) => p.vendor_count > 0);
 
@@ -372,6 +425,8 @@ const Browse = () => {
                   category={product.category}
                   imageUrl={product.image_url || undefined}
                   isSelected={selectedProducts.includes(product.id)}
+                  vendorRating={product.vendor_rating}
+                  vendorWebsite={product.vendor_website}
                   onToggleCompare={handleToggleCompare}
                   onViewDetails={(id) => navigate(`/product/${id}`)}
                 />
