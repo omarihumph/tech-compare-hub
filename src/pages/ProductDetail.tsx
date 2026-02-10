@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
 import { PriceAlertButton } from "@/components/PriceAlertButton";
+import { Link } from "react-router-dom";
+import { Star } from "lucide-react";
 
 interface CatalogProduct {
   id: string;
@@ -48,12 +50,17 @@ interface VendorListing {
   };
 }
 
+interface VendorRatingMap {
+  [vendorId: string]: { avg: number; count: number };
+}
+
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [product, setProduct] = useState<CatalogProduct | null>(null);
   const [listings, setListings] = useState<VendorListing[]>([]);
+  const [vendorRatings, setVendorRatings] = useState<VendorRatingMap>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -107,6 +114,28 @@ const ProductDetail = () => {
 
       if (listingsError) throw listingsError;
       setListings(listingsData || []);
+
+      // Fetch vendor ratings
+      const vendorIds = (listingsData || []).map(l => l.vendor_profiles.id).filter(Boolean);
+      if (vendorIds.length > 0) {
+        const { data: reviews } = await supabase
+          .from("vendor_reviews")
+          .select("vendor_id, rating")
+          .in("vendor_id", vendorIds);
+        
+        const ratingsMap: VendorRatingMap = {};
+        (reviews || []).forEach(r => {
+          if (!ratingsMap[r.vendor_id]) {
+            ratingsMap[r.vendor_id] = { avg: 0, count: 0 };
+          }
+          ratingsMap[r.vendor_id].count++;
+          ratingsMap[r.vendor_id].avg += r.rating;
+        });
+        Object.keys(ratingsMap).forEach(id => {
+          ratingsMap[id].avg = ratingsMap[id].avg / ratingsMap[id].count;
+        });
+        setVendorRatings(ratingsMap);
+      }
 
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -293,6 +322,36 @@ const ProductDetail = () => {
                             </Badge>
                           )}
                         </div>
+                        {/* Vendor Rating */}
+                        {vendorRatings[listing.vendor_profiles.id] && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star
+                                  key={s}
+                                  className={`h-3.5 w-3.5 ${s <= Math.round(vendorRatings[listing.vendor_profiles.id].avg) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-sm font-medium">{vendorRatings[listing.vendor_profiles.id].avg.toFixed(1)}</span>
+                            <Link
+                              to={`/vendor/${listing.vendor_profiles.id}/reviews`}
+                              className="text-xs text-primary hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              ({vendorRatings[listing.vendor_profiles.id].count} review{vendorRatings[listing.vendor_profiles.id].count > 1 ? 's' : ''})
+                            </Link>
+                          </div>
+                        )}
+                        {!vendorRatings[listing.vendor_profiles.id] && (
+                          <Link
+                            to={`/vendor/${listing.vendor_profiles.id}/reviews`}
+                            className="text-xs text-muted-foreground hover:text-primary mt-1 inline-block"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            No reviews yet — Be the first
+                          </Link>
+                        )}
                         {listing.vendor_profiles.description && (
                           <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                             {listing.vendor_profiles.description}
