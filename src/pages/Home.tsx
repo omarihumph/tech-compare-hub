@@ -762,8 +762,8 @@ const Home = () => {
             <div className="space-y-3">
               <h4 className="font-bold text-lg">Support</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Contact Us</a></li>
+                <li><Link to="/help" className="hover:text-primary transition-colors">Help Center</Link></li>
+                <li><Link to="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
               </ul>
             </div>
           </div>
