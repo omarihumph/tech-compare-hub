@@ -50,9 +50,9 @@ const CONTACT_INFO = [
   {
     icon: Mail,
     title: "Email",
-    value: "support@techprice.com",
+    value: "techpriceke@gmail.com",
     description: "We'll respond within 24 hours",
-    href: "mailto:support@techprice.com",
+    href: "mailto:techpriceke@gmail.com",
   },
   {
     icon: Phone,
