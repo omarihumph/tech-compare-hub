@@ -1,5 +1,6 @@
 import { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { HomeReviews } from "@/components/HomeReviews";
+import { TopVendors } from "@/components/TopVendors";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, ShoppingCart, Star, Shield, Zap, X, Menu, User, LogOut, Store, ChevronDown, ChevronLeft, ChevronRight, ArrowDown } from "lucide-react";
@@ -675,6 +676,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* Most Reviewed Vendors */}
+      <TopVendors />
 
       {/* Reviews & Testimonials */}
       <HomeReviews />
