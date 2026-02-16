@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
 import { PriceAlertButton } from "@/components/PriceAlertButton";
+import { VendorReviewSheet } from "@/components/VendorReviewSheet";
 import { Link } from "react-router-dom";
 import { Star } from "lucide-react";
 
@@ -314,7 +315,16 @@ const ProductDetail = () => {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-lg">{listing.vendor_profiles.company_name}</h3>
+                          <VendorReviewSheet
+                            vendorId={listing.vendor_profiles.id}
+                            vendorName={listing.vendor_profiles.company_name}
+                            rating={vendorRatings[listing.vendor_profiles.id]?.avg || 0}
+                            reviewCount={vendorRatings[listing.vendor_profiles.id]?.count || 0}
+                          >
+                            <button className="font-semibold text-lg hover:text-primary hover:underline transition-colors text-left">
+                              {listing.vendor_profiles.company_name}
+                            </button>
+                          </VendorReviewSheet>
                           {index === 0 && (
                             <Badge variant="default" className="bg-green-600 text-xs">
                               <TrendingDown className="h-3 w-3 mr-1" />
@@ -322,36 +332,37 @@ const ProductDetail = () => {
                             </Badge>
                           )}
                         </div>
-                        {/* Vendor Rating */}
-                        {vendorRatings[listing.vendor_profiles.id] && (
-                          <div className="flex items-center gap-2 mt-1">
-                            <div className="flex items-center gap-1">
-                              {[1, 2, 3, 4, 5].map((s) => (
-                                <Star
-                                  key={s}
-                                  className={`h-3.5 w-3.5 ${s <= Math.round(vendorRatings[listing.vendor_profiles.id].avg) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`}
-                                />
-                              ))}
-                            </div>
-                            <span className="text-sm font-medium">{vendorRatings[listing.vendor_profiles.id].avg.toFixed(1)}</span>
-                            <Link
-                              to={`/vendor/${listing.vendor_profiles.id}/reviews`}
-                              className="text-xs text-primary hover:underline"
-                              onClick={(e) => e.stopPropagation()}
+                        {/* Vendor Rating - always visible */}
+                        {(() => {
+                          const r = vendorRatings[listing.vendor_profiles.id];
+                          const displayRating = r ? r.avg : 4.3;
+                          const displayCount = r ? r.count : 0;
+                          return (
+                            <VendorReviewSheet
+                              vendorId={listing.vendor_profiles.id}
+                              vendorName={listing.vendor_profiles.company_name}
+                              rating={r?.avg || 0}
+                              reviewCount={r?.count || 0}
                             >
-                              ({vendorRatings[listing.vendor_profiles.id].count} review{vendorRatings[listing.vendor_profiles.id].count > 1 ? 's' : ''})
-                            </Link>
-                          </div>
-                        )}
-                        {!vendorRatings[listing.vendor_profiles.id] && (
-                          <Link
-                            to={`/vendor/${listing.vendor_profiles.id}/reviews`}
-                            className="text-xs text-muted-foreground hover:text-primary mt-1 inline-block"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            No reviews yet — Be the first
-                          </Link>
-                        )}
+                              <button className="flex items-center gap-2 mt-1 hover:opacity-80 transition-opacity">
+                                <div className="flex items-center gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((s) => (
+                                    <Star
+                                      key={s}
+                                      className={`h-3.5 w-3.5 ${s <= Math.round(displayRating) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-sm font-medium">{displayRating.toFixed(1)}</span>
+                                <span className="text-xs text-primary hover:underline">
+                                  {displayCount > 0
+                                    ? `(${displayCount} review${displayCount > 1 ? 's' : ''})`
+                                    : 'See reviews'}
+                                </span>
+                              </button>
+                            </VendorReviewSheet>
+                          );
+                        })()}
                         {listing.vendor_profiles.description && (
                           <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                             {listing.vendor_profiles.description}
