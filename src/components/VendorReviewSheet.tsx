@@ -17,41 +17,80 @@ interface Review {
   reviewerName?: string;
 }
 
-// Creative mock reviews for vendors with no real reviews yet
-const mockReviews: Omit<Review, "user_id">[] = [
+// Creative mock reviews pool — each vendor gets a unique subset based on vendorId hash
+const allMockReviews: Omit<Review, "user_id">[] = [
   {
-    id: "mock-1",
-    rating: 5,
-    title: "Excellent service and fast delivery",
+    id: "mock-1", rating: 5, title: "Excellent service and fast delivery",
     content: "Ordered a laptop and it arrived within 2 days. The vendor was very responsive on WhatsApp and even helped me set it up remotely. Highly recommend!",
-    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
-    reviewerName: "James K.",
+    created_at: new Date(Date.now() - 3 * 86400000).toISOString(), reviewerName: "James K.",
   },
   {
-    id: "mock-2",
-    rating: 4,
-    title: "Great prices, solid products",
+    id: "mock-2", rating: 4, title: "Great prices, solid products",
     content: "I've bought multiple items from this vendor. Prices are consistently lower than other shops in Nairobi. Only giving 4 stars because packaging could be better.",
-    created_at: new Date(Date.now() - 7 * 86400000).toISOString(),
-    reviewerName: "Faith M.",
+    created_at: new Date(Date.now() - 7 * 86400000).toISOString(), reviewerName: "Faith M.",
   },
   {
-    id: "mock-3",
-    rating: 5,
-    title: "Trusted vendor - bought here twice",
+    id: "mock-3", rating: 5, title: "Trusted vendor - bought here twice",
     content: "First time I was skeptical buying online but this vendor proved me wrong. Genuine products with warranty. Will definitely come back for my next purchase.",
-    created_at: new Date(Date.now() - 14 * 86400000).toISOString(),
-    reviewerName: "Brian O.",
+    created_at: new Date(Date.now() - 14 * 86400000).toISOString(), reviewerName: "Brian O.",
   },
   {
-    id: "mock-4",
-    rating: 4,
-    title: "Good communication",
+    id: "mock-4", rating: 4, title: "Good communication",
     content: "The vendor kept me updated throughout the process. Product was exactly as described. Would appreciate more payment options though.",
-    created_at: new Date(Date.now() - 21 * 86400000).toISOString(),
-    reviewerName: "Wanjiku N.",
+    created_at: new Date(Date.now() - 21 * 86400000).toISOString(), reviewerName: "Wanjiku N.",
+  },
+  {
+    id: "mock-5", rating: 5, title: "Best tech shop in town",
+    content: "I compared prices across 5 different stores and this vendor had the best deal. Product was sealed and original. Delivery to my doorstep was a bonus!",
+    created_at: new Date(Date.now() - 5 * 86400000).toISOString(), reviewerName: "Kevin W.",
+  },
+  {
+    id: "mock-6", rating: 3, title: "Decent but room for improvement",
+    content: "Product was okay but took longer than expected to arrive. Customer service was polite though and they followed up after delivery. Would try again.",
+    created_at: new Date(Date.now() - 10 * 86400000).toISOString(), reviewerName: "Amina H.",
+  },
+  {
+    id: "mock-7", rating: 5, title: "Amazing after-sales support",
+    content: "Had an issue with my screen protector and they replaced it for free! Not many vendors do that. This is my go-to store now for all electronics.",
+    created_at: new Date(Date.now() - 2 * 86400000).toISOString(), reviewerName: "Peter N.",
+  },
+  {
+    id: "mock-8", rating: 4, title: "Reliable and consistent",
+    content: "Third purchase from this vendor. They always deliver what they promise. Prices are fair and the products are genuine. Keep it up!",
+    created_at: new Date(Date.now() - 18 * 86400000).toISOString(), reviewerName: "Lucy A.",
+  },
+  {
+    id: "mock-9", rating: 5, title: "Smooth M-Pesa payment",
+    content: "Love that they accept M-Pesa! Paid and got my item delivered the same day in Nairobi. Very professional team. Definitely recommending to friends.",
+    created_at: new Date(Date.now() - 1 * 86400000).toISOString(), reviewerName: "Dennis M.",
+  },
+  {
+    id: "mock-10", rating: 4, title: "Good value for money",
+    content: "The laptop I got was well-priced compared to other retailers. Packaging was secure and the vendor even included a free mouse. Nice touch!",
+    created_at: new Date(Date.now() - 12 * 86400000).toISOString(), reviewerName: "Cynthia J.",
   },
 ];
+
+// Simple hash to get a deterministic number from vendorId
+const hashVendorId = (id: string): number => {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash) + id.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+};
+
+const getMockReviewsForVendor = (vendorId: string) => {
+  const hash = hashVendorId(vendorId);
+  const count = 3 + (hash % 3); // 3-5 reviews per vendor
+  const start = hash % allMockReviews.length;
+  const result: typeof allMockReviews = [];
+  for (let i = 0; i < count; i++) {
+    result.push(allMockReviews[(start + i) % allMockReviews.length]);
+  }
+  return result;
+};
 
 interface VendorReviewSheetProps {
   vendorId: string;
@@ -111,9 +150,10 @@ export const VendorReviewSheet = ({
     }
   };
 
-  const displayReviews = reviews.length > 0 ? reviews : (mockReviews as any);
-  const displayRating = rating > 0 ? rating : 4.3;
-  const displayCount = reviewCount > 0 ? reviewCount : mockReviews.length;
+  const vendorMocks = getMockReviewsForVendor(vendorId);
+  const displayReviews = reviews.length > 0 ? reviews : (vendorMocks as any);
+  const displayRating = rating > 0 ? rating : 3.5 + (hashVendorId(vendorId) % 15) / 10; // 3.5-5.0 per vendor
+  const displayCount = reviewCount > 0 ? reviewCount : vendorMocks.length;
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
