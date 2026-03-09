@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Settings from "./pages/Settings";
 import HelpCenter from "./pages/HelpCenter";
 import Contact from "./pages/Contact";
+import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 import VendorProtectedRoute from "./components/VendorProtectedRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
