@@ -16,9 +16,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Settings from "./pages/Settings";
 import HelpCenter from "./pages/HelpCenter";
 import Contact from "./pages/Contact";
-
-import NotFound from "./pages/NotFound";
-import VendorProtectedRoute from "./components/VendorProtectedRoute";
+endorProtectedRoute from "./components/VendorProtectedRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Chatbot from "./components/Chatbot";
 import VendorReviews from "./pages/VendorReviews";
@@ -78,8 +76,7 @@ const App = () => (
             <Route path="/vendor/:vendorId/reviews" element={<VendorReviews />} />
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/documentation" element={<Documentation />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/documentation" element={<DocumentatiATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Chatbot />
