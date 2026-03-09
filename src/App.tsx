@@ -77,7 +77,7 @@ const App = () => (
             <Route path="/vendor/:vendorId/reviews" element={<VendorReviews />} />
             <Route path="/help" element={<HelpCenter />} />
             <Route path="/contact" element={<Contact />} />
-    {/* ADD ALL CUSTOM ROUTES ABOVE THE CumentatiATCH-ALL "*" ROUTE */}
+    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Chatbot />
